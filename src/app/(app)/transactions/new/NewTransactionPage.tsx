@@ -41,6 +41,7 @@ export function NewTransactionPage() {
   const expenseCategories = [
     { value: 'cartão_de_crédito', label: 'Cartão de Crédito' },
     { value: 'supermercado', label: 'Supermercado' },
+    { value: 'alimentacao', label: 'Alimentação' },
     { value: 'informática', label: 'Informática' },
     { value: 'transporte', label: 'Transporte' },
     { value: 'saúde', label: 'Saúde' },
@@ -54,9 +55,7 @@ export function NewTransactionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const date =
-      formData.date ||
-      new Date().toISOString().split('T')[0];
+    const date = formData.date || new Date().toISOString().split('T')[0];
     await addTransaction({
       ...formData,
       date,

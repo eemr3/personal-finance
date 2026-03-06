@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
 
 import { BottomNav } from '@/components/BottomNav';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
@@ -24,7 +24,6 @@ function TransactionsPage() {
     totalIncome,
     totalExpenses,
     loading,
-    editTransaction,
     removeTransaction,
   } = useTransactionsWithRules();
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +34,9 @@ function TransactionsPage() {
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     const txType = (t: { type?: unknown }) =>
-      String(t.type ?? '').toLowerCase().trim();
+      String(t.type ?? '')
+        .toLowerCase()
+        .trim();
     return allTransactionsForDisplay.filter((transaction) => {
       const matchesSearch =
         !query ||
