@@ -10,10 +10,11 @@ import {
   LogOut,
   ChevronRight,
 } from 'lucide-react';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 
 function SettingsPage() {
   const router = useRouter();
-
+  const { logout } = useAuth();
   const settingsSections = [
     {
       title: 'Account',
@@ -58,7 +59,7 @@ function SettingsPage() {
 
   const handleLogout = () => {
     // Mock logout
-    router.push('/login');
+    logout();
   };
 
   return (

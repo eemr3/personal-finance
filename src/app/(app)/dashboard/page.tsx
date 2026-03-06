@@ -1,38 +1,139 @@
 'use client';
+
+import { useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { BottomNav } from '@/components/BottomNav';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { FinanceSummaryCard } from '@/components/FinanceSummaryCard';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/Card';
-import { Button } from '@/components/Button';
-import { TransactionCard } from '@/components/TransactionCard';
 import {
-  Wallet,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  ShoppingBag,
-  Coffee,
-  Home,
-  Car,
-} from 'lucide-react';
-import {
-  BarChart,
   Bar,
-  PieChart,
-  Pie,
+  BarChart,
   Cell,
+  Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
-import { useAuth } from '../../../features/auth/hooks/useAuth';
-import Image from 'next/image';
+
+import { BottomNav } from '@/components/BottomNav';
+import { Button } from '@/components/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
+import { FinanceSummaryCard } from '@/components/FinanceSummaryCard';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { PeriodSelector } from '@/components/PeriodSelector';
+import { TransactionCard } from '@/components/TransactionCard';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
+import { formatBRL } from '@/lib/format';
+import { LogOut, TrendingDown, TrendingUp } from 'lucide-react';
+
+const CATEGORY_COLORS = [
+  '#10b981',
+  '#3b82f6',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#ec4899',
+  '#14b8a6',
+];
+
+const MONTH_LABELS: Record<string, string> = {
+  '01': 'Jan',
+  '02': 'Fev',
+  '03': 'Mar',
+  '04': 'Abr',
+  '05': 'Mai',
+  '06': 'Jun',
+  '07': 'Jul',
+  '08': 'Ago',
+  '09': 'Set',
+  '10': 'Out',
+  '11': 'Nov',
+  '12': 'Dez',
+};
+
+function getMonthKey(t: {
+  date?: string;
+  createdAt?: { toDate?: () => Date };
+}): string {
+  if (typeof t.date === 'string') {
+    const ddmmyyyy = t.date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}`;
+    const iso = t.date.match(/^(\d{4})-(\d{2})/);
+    if (iso) return `${iso[1]}-${iso[2]}`;
+  }
+  const ts = t.createdAt as { toDate?: () => Date } | undefined;
+  if (ts?.toDate) {
+    const d = ts.toDate();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  }
+  return '';
+}
 
 function DashboardPage() {
   const router = useRouter();
+  const {
+    allTransactionsForDisplay,
+    allExpenses,
+    totalIncome,
+    totalExpenses,
+    loading: transactionsLoading,
+  } = useTransactionsWithRules();
   const { user, loading, logout } = useAuth();
+
+  const monthlyData = useMemo(() => {
+    const byMonth: Record<string, { receitas: number; despesas: number }> = {};
+    for (const t of allExpenses) {
+      const key = getMonthKey(t);
+      if (key) {
+        if (!byMonth[key]) byMonth[key] = { receitas: 0, despesas: 0 };
+        byMonth[key].despesas += Number(t.amount ?? 0);
+      }
+    }
+    for (const t of allTransactionsForDisplay.filter(
+      (x) => String(x.type ?? '').toLowerCase() === 'income',
+    )) {
+      const key = getMonthKey(
+        t as { date?: string; createdAt?: { toDate?: () => Date } },
+      );
+      if (key) {
+        if (!byMonth[key]) byMonth[key] = { receitas: 0, despesas: 0 };
+        byMonth[key].receitas += Number((t as { amount?: number }).amount ?? 0);
+      }
+    }
+    const keys = Object.keys(byMonth).sort().slice(-6);
+    return keys.map((key) => {
+      const [, mm] = key.split('-');
+      const data = byMonth[key];
+      return {
+        month: MONTH_LABELS[mm] ?? mm,
+        receitas: data.receitas,
+        despesas: data.despesas,
+      };
+    });
+  }, [allExpenses, allTransactionsForDisplay]);
+
+  const categoryData = useMemo(() => {
+    const byCategory: Record<string, number> = {};
+    for (const t of allExpenses) {
+      const cat = t.category || 'Outros';
+      byCategory[cat] = (byCategory[cat] ?? 0) + Number(t.amount ?? 0);
+    }
+    const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+    return entries.map(([name], i) => ({
+      name,
+      value: entries[i][1],
+      color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+    }));
+  }, [allExpenses]);
+
+  const recentTransactions = useMemo(
+    () => allTransactionsForDisplay.slice(0, 5),
+    [allTransactionsForDisplay],
+  );
 
   if (loading) {
     return <p>Carregando...</p>;
@@ -41,52 +142,6 @@ function DashboardPage() {
   if (!user) {
     return <p>Usuário não autenticado</p>;
   }
-  const monthlyData = [
-    { month: 'Jan', amount: 4200 },
-    { month: 'Feb', amount: 3800 },
-    { month: 'Mar', amount: 4500 },
-    { month: 'Apr', amount: 4100 },
-    { month: 'May', amount: 4800 },
-    { month: 'Jun', amount: 5200 },
-  ];
-
-  const categoryData = [
-    { name: 'Housing', value: 1200, color: '#10b981' },
-    { name: 'Food', value: 600, color: '#3b82f6' },
-    { name: 'Transport', value: 400, color: '#f59e0b' },
-    { name: 'Shopping', value: 350, color: '#ef4444' },
-    { name: 'Other', value: 450, color: '#8b5cf6' },
-  ];
-
-  const recentTransactions = [
-    {
-      id: '1',
-      type: 'expense' as const,
-      name: 'Grocery Shopping',
-      amount: 125.5,
-      category: 'Food',
-      date: 'Today',
-      icon: <ShoppingBag className="text-danger" size={24} />,
-    },
-    {
-      id: '2',
-      type: 'income' as const,
-      name: 'Freelance Project',
-      amount: 2500.0,
-      category: 'Income',
-      date: 'Yesterday',
-      icon: <DollarSign className="text-success" size={24} />,
-    },
-    {
-      id: '3',
-      type: 'expense' as const,
-      name: 'Coffee Shop',
-      amount: 8.5,
-      category: 'Food',
-      date: 'Yesterday',
-      icon: <Coffee className="text-danger" size={24} />,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -111,28 +166,33 @@ function DashboardPage() {
           </div>
 
           <Button variant="ghost" size="sm" onClick={logout}>
-            Sair
+            <LogOut size={24} />
           </Button>
         </div>
+        <div className="mb-4">
+          <PeriodSelector />
+        </div>
         <div className="mb-6">
-          <p className="text-muted-foreground mb-1">Total Balance</p>
-          <h1 className="text-4xl">$8,450.00</h1>
+          <p className="text-muted-foreground mb-1">Saldo total</p>
+          <h1 className="text-4xl">
+            R$ {formatBRL(totalIncome - totalExpenses)}
+          </h1>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <FinanceSummaryCard
-            title="Income"
-            amount={12500}
+            title="Receitas"
+            amount={totalIncome}
             icon={<TrendingUp className="text-success" size={24} />}
             variant="income"
-            subtitle="This month"
+            subtitle="Este mês"
           />
           <FinanceSummaryCard
-            title="Expenses"
-            amount={4050}
+            title="Despesas"
+            amount={totalExpenses}
             icon={<TrendingDown className="text-danger" size={24} />}
             variant="expense"
-            subtitle="This month"
+            subtitle="Este mês"
           />
         </div>
       </div>
@@ -140,11 +200,11 @@ function DashboardPage() {
       <div className="px-6 space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Spending</CardTitle>
+            <CardTitle>Receitas e despesas mensais</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={monthlyData}>
+              <BarChart data={monthlyData} barCategoryGap="20%" barGap={8}>
                 <XAxis
                   dataKey="month"
                   stroke="#888888"
@@ -157,7 +217,7 @@ function DashboardPage() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
+                  tickFormatter={(value) => `R$ ${formatBRL(value)}`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -165,9 +225,24 @@ function DashboardPage() {
                     border: '1px solid var(--border)',
                     borderRadius: '12px',
                   }}
-                  formatter={(value) => [`$${value}`, 'Spending']}
+                  formatter={(value, name) => [
+                    `R$ ${formatBRL(Number(value))}`,
+                    name === 'receitas' ? 'Receitas' : 'Despesas',
+                  ]}
                 />
-                <Bar dataKey="amount" fill="#10b981" radius={[8, 8, 0, 0]} />
+                <Bar
+                  dataKey="receitas"
+                  name="Receitas"
+                  fill="#22c55e"
+                  radius={[8, 8, 0, 0]}
+                />
+                <Bar
+                  dataKey="despesas"
+                  name="Despesas"
+                  fill="#ef4444"
+                  radius={[8, 8, 0, 0]}
+                />
+                <Legend />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -175,7 +250,7 @@ function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Spending by Category</CardTitle>
+            <CardTitle>Gastos por categoria</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-6">
@@ -210,7 +285,7 @@ function DashboardPage() {
                       <span className="text-sm">{category.name}</span>
                     </div>
                     <span className="text-sm font-medium">
-                      ${category.value}
+                      R$ {formatBRL(category.value)}
                     </span>
                   </div>
                 ))}
@@ -221,19 +296,31 @@ function DashboardPage() {
 
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h3>Recent Transactions</h3>
+            <h3>Transações recentes</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => router.push('/transactions')}
             >
-              See all
+              Ver todas
             </Button>
           </div>
           <div className="space-y-3">
-            {recentTransactions.map((transaction) => (
-              <TransactionCard key={transaction.id} {...transaction} />
-            ))}
+            {recentTransactions.length === 0 && !transactionsLoading ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma transação recente.
+              </p>
+            ) : (
+              recentTransactions.map((transaction) => (
+                <TransactionCard
+                  key={transaction.id}
+                  {...transaction}
+                  source={
+                    'source' in transaction ? transaction.source : undefined
+                  }
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from './Card';
+import { formatBRL } from '../lib/format';
 
 interface FinanceSummaryCardProps {
   title: string;
@@ -32,13 +33,17 @@ export function FinanceSummaryCard({
     <Card className="hover:shadow-md transition-shadow">
       <CardContent>
         <div className="flex items-start justify-between mb-3">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${bgStyles[variant]}`}>
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center ${bgStyles[variant]}`}
+          >
             {icon}
           </div>
         </div>
         <p className="text-sm text-muted-foreground mb-1">{title}</p>
-        <h2 className={variantStyles[variant]}>${amount.toFixed(2)}</h2>
-        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+        <h2 className={variantStyles[variant]}>R$ {formatBRL(amount)}</h2>
+        {subtitle && (
+          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+        )}
       </CardContent>
     </Card>
   );

@@ -5,6 +5,7 @@ import { Button } from '@/components/Button';
 import { RuleCard } from '@/components/RuleCard';
 import { Input, Select, TextArea } from '@/components/Input';
 import { ArrowLeft, Plus, X } from 'lucide-react';
+import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
 
 interface Rule {
   id: string;
@@ -16,38 +17,33 @@ interface Rule {
 
 function FixedExpensesPage() {
   const router = useRouter();
+  const { rules, loading, fetchRules, addRule, updateRule, deleteRule } =
+    useFixedExpenseRules();
   const [showModal, setShowModal] = useState(false);
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
-  const [rules, setRules] = useState<Rule[]>([
-    {
-      id: '1',
-      name: 'Trybe Payment',
-      condition: 'If income > $3,000',
-      amount: '17%',
-      category: 'Education',
-    },
-    {
-      id: '2',
-      name: 'Tithe',
-      condition: 'Always apply',
-      amount: '10%',
-      category: 'Religious',
-    },
-    {
-      id: '3',
-      name: 'DAS Tax',
-      condition: 'Monthly on day 20',
-      amount: '$450',
-      category: 'Taxes',
-    },
-    {
-      id: '4',
-      name: 'Cursor AI Subscription',
-      condition: 'Monthly on day 1',
-      amount: '$20',
-      category: 'Subscriptions',
-    },
-  ]);
+  // const [rules, setRules] = useState<Rule[]>([
+  //   {
+  //     id: '2',
+  //     name: 'Tithe',
+  //     condition: 'Always apply',
+  //     amount: '10%',
+  //     category: 'Religious',
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'DAS Tax',
+  //     condition: 'Monthly on day 20',
+  //     amount: '$450',
+  //     category: 'Taxes',
+  //   },
+  //   {
+  //     id: '4',
+  //     name: 'Cursor AI Subscription',
+  //     condition: 'Monthly on day 1',
+  //     amount: '$20',
+  //     category: 'Subscriptions',
+  //   },
+  // ]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -81,9 +77,10 @@ function FixedExpensesPage() {
     setShowModal(true);
   };
 
-  const handleEditRule = (rule: Rule) => {
+  const handleEditRule = (rule: Rule & { amountType?: string }) => {
     setEditingRule(rule);
-    const isPercentage = rule.amount.includes('%');
+    const isPercentage =
+      rule.amountType === 'percentage' || rule.amount.includes('%');
     setFormData({
       name: rule.name,
       condition: rule.condition,
@@ -95,41 +92,20 @@ function FixedExpensesPage() {
   };
 
   const handleDeleteRule = (ruleId: string) => {
-    setRules(rules.filter((r) => r.id !== ruleId));
+    deleteRule(ruleId);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const amountDisplay =
-      formData.amountType === 'percentage'
-        ? `${formData.amount}%`
-        : `$${formData.amount}`;
-
     if (editingRule) {
-      setRules(
-        rules.map((r) =>
-          r.id === editingRule.id
-            ? {
-                ...r,
-                name: formData.name,
-                condition: formData.condition,
-                amount: amountDisplay,
-                category: formData.category,
-              }
-            : r,
-        ),
-      );
+      updateRule(editingRule.id, formData);
     } else {
-      const newRule: Rule = {
-        id: Date.now().toString(),
-        name: formData.name,
-        condition: formData.condition,
-        amount: amountDisplay,
-        category: formData.category,
-      };
-      setRules([...rules, newRule]);
+      addRule({
+        ...formData,
+        createdAt: new Date(),
+      });
     }
-
+    fetchRules();
     setShowModal(false);
   };
 
