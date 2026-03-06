@@ -3,9 +3,68 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { RuleCard } from '@/components/RuleCard';
-import { Input, Select, TextArea } from '@/components/Input';
+import { Input, Select } from '@/components/Input';
 import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
+
+type ConditionType =
+  | 'always'
+  | 'income_above'
+  | 'day_of_month'
+  | 'custom';
+
+const CONDITION_TYPE_OPTIONS: { value: ConditionType; label: string }[] = [
+  { value: 'always', label: 'Sempre aplicar' },
+  { value: 'income_above', label: 'Quando receita for maior que' },
+  { value: 'day_of_month', label: 'Todo mês no dia' },
+  { value: 'custom', label: 'Outra (descreva)' },
+];
+
+function buildConditionString(
+  type: ConditionType,
+  incomeMin: string,
+  day: string,
+  custom: string,
+): string {
+  switch (type) {
+    case 'always':
+      return 'Sempre aplicar';
+    case 'income_above': {
+      const n = incomeMin.replace(/\D/g, '');
+      return n ? `Se receita > R$ ${Number(n).toLocaleString('pt-BR')}` : 'Sempre aplicar';
+    }
+    case 'day_of_month':
+      return day ? `Mensalmente no dia ${day}` : 'Sempre aplicar';
+    case 'custom':
+      return custom.trim() || 'Sempre aplicar';
+    default:
+      return 'Sempre aplicar';
+  }
+}
+
+function parseCondition(condition: string): {
+  type: ConditionType;
+  incomeMin: string;
+  day: string;
+  custom: string;
+} {
+  const c = (condition || '').trim();
+  const lower = c.toLowerCase();
+  if (!c || lower.includes('sempre aplicar')) {
+    return { type: 'always', incomeMin: '', day: '', custom: '' };
+  }
+  // "if income > 3200", "receita > 3000", "Se receita > R$ 3.000"
+  if (lower.includes('income') || lower.includes('receita')) {
+    const num = c.replace(/[^\d,.]/g, '').replace(',', '.').replace(/\.(?=.*\.)/g, '');
+    if (num) return { type: 'income_above', incomeMin: num, day: '', custom: '' };
+  }
+  const dayMatch = c.match(/dia\s*(\d{1,2})|(\d{1,2})\s*do\s*mês|mensalmente\s*no\s*dia\s*(\d{1,2})|day\s*(\d{1,2})/i);
+  if (dayMatch) {
+    const d = (dayMatch[1] || dayMatch[2] || dayMatch[3] || dayMatch[4] || '').trim();
+    if (d) return { type: 'day_of_month', incomeMin: '', day: d, custom: '' };
+  }
+  return { type: 'custom', incomeMin: '', day: '', custom: c };
+}
 
 interface Rule {
   id: string;
@@ -47,32 +106,38 @@ function FixedExpensesPage() {
 
   const [formData, setFormData] = useState({
     name: '',
-    condition: '',
+    conditionType: 'always' as ConditionType,
+    conditionIncomeMin: '',
+    conditionDay: '',
+    conditionCustom: '',
     amountType: 'fixed',
     amount: '',
     category: '',
   });
 
   const categoryOptions = [
-    { value: 'education', label: 'Education' },
-    { value: 'religious', label: 'Religious' },
-    { value: 'taxes', label: 'Taxes' },
-    { value: 'subscriptions', label: 'Subscriptions' },
-    { value: 'utilities', label: 'Utilities' },
-    { value: 'insurance', label: 'Insurance' },
-    { value: 'debt', label: 'Debt Payment' },
-    { value: 'savings', label: 'Savings' },
-    { value: 'other', label: 'Other' },
+    { value: 'educação', label: 'Educação' },
+    { value: 'religious', label: 'Religioso' },
+    { value: 'taxes', label: 'Impostos' },
+    { value: 'subscriptions', label: 'Assinaturas' },
+    { value: 'utilities', label: 'Utilidades' },
+    { value: 'insurance', label: 'Seguros' },
+    { value: 'debt', label: 'Dívidas' },
+    { value: 'savings', label: 'Economia' },
+    { value: 'other', label: 'Outros' },
   ];
 
   const handleAddRule = () => {
     setEditingRule(null);
     setFormData({
       name: '',
-      condition: '',
+      conditionType: 'always',
+      conditionIncomeMin: '',
+      conditionDay: '',
+      conditionCustom: '',
       amountType: 'fixed',
       amount: '',
-      category: '',
+      category: categoryOptions[0].value,
     });
     setShowModal(true);
   };
@@ -81,12 +146,19 @@ function FixedExpensesPage() {
     setEditingRule(rule);
     const isPercentage =
       rule.amountType === 'percentage' || rule.amount.includes('%');
+    const raw = (rule.category ?? '').toLowerCase().trim();
+    const categoryValue =
+      raw === 'education' ? 'educação' : raw || categoryOptions[0].value;
+    const parsed = parseCondition(rule.condition ?? '');
     setFormData({
       name: rule.name,
-      condition: rule.condition,
+      conditionType: parsed.type,
+      conditionIncomeMin: parsed.incomeMin,
+      conditionDay: parsed.day,
+      conditionCustom: parsed.custom,
       amountType: isPercentage ? 'percentage' : 'fixed',
       amount: rule.amount.replace('$', '').replace('%', ''),
-      category: rule.category.toLowerCase(),
+      category: categoryValue,
     });
     setShowModal(true);
   };
@@ -97,11 +169,24 @@ function FixedExpensesPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const condition = buildConditionString(
+      formData.conditionType,
+      formData.conditionIncomeMin,
+      formData.conditionDay,
+      formData.conditionCustom,
+    );
+    const payload = {
+      name: formData.name.trim(),
+      condition,
+      amountType: formData.amountType,
+      amount: formData.amount.trim(),
+      category: (formData.category || categoryOptions[0].value).trim(),
+    };
     if (editingRule) {
-      updateRule(editingRule.id, formData);
+      updateRule(editingRule.id, payload);
     } else {
       addRule({
-        ...formData,
+        ...payload,
         createdAt: new Date(),
       });
     }
@@ -120,11 +205,11 @@ function FixedExpensesPage() {
             >
               <ArrowLeft size={24} />
             </button>
-            <h1>Fixed Expense Rules</h1>
+            <h1>Regras de despesas fixas</h1>
           </div>
         </div>
         <p className="text-muted-foreground ml-14">
-          Automatic rules for recurring expenses
+          Regras automáticas para despesas recorrentes
         </p>
       </div>
 
@@ -133,7 +218,11 @@ function FixedExpensesPage() {
           rules.map((rule) => (
             <RuleCard
               key={rule.id}
-              {...rule}
+              id={rule.id}
+              name={rule.name}
+              condition={rule.condition}
+              amount={rule.amount}
+              category={rule.category ?? ''}
               onEdit={() => handleEditRule(rule)}
               onDelete={() => handleDeleteRule(rule.id)}
             />
@@ -141,9 +230,9 @@ function FixedExpensesPage() {
         ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">
-              No rules configured yet
+              Nenhuma regra configurada ainda
             </p>
-            <Button onClick={handleAddRule}>Add Your First Rule</Button>
+            <Button onClick={handleAddRule}>Criar primeira regra</Button>
           </div>
         )}
 
@@ -156,7 +245,7 @@ function FixedExpensesPage() {
               className="border-dashed"
             >
               <Plus size={20} className="mr-2" />
-              Add New Rule
+              Nova regra
             </Button>
           </div>
         )}
@@ -166,7 +255,7 @@ function FixedExpensesPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
           <div className="bg-background w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-              <h2>{editingRule ? 'Edit Rule' : 'New Rule'}</h2>
+              <h2>{editingRule ? 'Editar regra' : 'Nova regra'}</h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -177,8 +266,8 @@ function FixedExpensesPage() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <Input
-                label="Rule Name"
-                placeholder="e.g., Trybe Payment"
+                label="Nome da regra"
+                placeholder="ex.: Pagamento Trybe"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -186,19 +275,78 @@ function FixedExpensesPage() {
                 required
               />
 
-              <TextArea
-                label="Condition"
-                placeholder="e.g., If income > $3,000 or Monthly on day 15"
-                value={formData.condition}
-                onChange={(e) =>
-                  setFormData({ ...formData, condition: e.target.value })
-                }
-                required
-              />
+              <div>
+                <label className="text-sm text-foreground mb-2 block">
+                  Condição
+                </label>
+                <Select
+                  options={CONDITION_TYPE_OPTIONS}
+                  value={formData.conditionType}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      conditionType: e.target.value as ConditionType,
+                    })
+                  }
+                />
+                {formData.conditionType === 'income_above' && (
+                  <div className="mt-3 relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      R$
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      placeholder="0"
+                      value={formData.conditionIncomeMin}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          conditionIncomeMin: e.target.value,
+                        })
+                      }
+                      className="w-full mt-2 pl-10 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                )}
+                {formData.conditionType === 'day_of_month' && (
+                  <div className="mt-3">
+                    <input
+                      type="number"
+                      min="1"
+                      max="31"
+                      placeholder="1 a 31"
+                      value={formData.conditionDay}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          conditionDay: e.target.value.replace(/\D/g, '').slice(0, 2),
+                        })
+                      }
+                      className="w-full mt-2 px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                )}
+                {formData.conditionType === 'custom' && (
+                  <input
+                    type="text"
+                    placeholder="Ex.: Se receita > R$ 5.000 e mês ímpar"
+                    value={formData.conditionCustom}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        conditionCustom: e.target.value,
+                      })
+                    }
+                    className="w-full mt-3 px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                )}
+              </div>
 
               <div>
                 <label className="text-sm text-foreground mb-2 block">
-                  Amount Type
+                  Tipo de valor
                 </label>
                 <div className="flex gap-3 mb-3">
                   <button
@@ -212,7 +360,7 @@ function FixedExpensesPage() {
                         : 'bg-card border border-border'
                     }`}
                   >
-                    Fixed Amount
+                    Valor fixo
                   </button>
                   <button
                     type="button"
@@ -225,13 +373,13 @@ function FixedExpensesPage() {
                         : 'bg-card border border-border'
                     }`}
                   >
-                    Percentage
+                    Percentual
                   </button>
                 </div>
 
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-                    {formData.amountType === 'fixed' ? '$' : '%'}
+                    {formData.amountType === 'fixed' ? 'R$' : '%'}
                   </span>
                   <input
                     type="number"
@@ -248,7 +396,7 @@ function FixedExpensesPage() {
               </div>
 
               <Select
-                label="Category"
+                label="Categoria"
                 options={categoryOptions}
                 value={formData.category}
                 onChange={(e) =>
@@ -259,7 +407,7 @@ function FixedExpensesPage() {
 
               <div className="pt-4 space-y-3">
                 <Button type="submit" fullWidth size="lg">
-                  {editingRule ? 'Save Changes' : 'Add Rule'}
+                  {editingRule ? 'Salvar alterações' : 'Adicionar regra'}
                 </Button>
                 <Button
                   type="button"
@@ -267,7 +415,7 @@ function FixedExpensesPage() {
                   fullWidth
                   onClick={() => setShowModal(false)}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
               </div>
             </form>

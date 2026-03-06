@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ArrowDownRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 
 import { formatBRL, formatDate } from '@/lib/format';
+import { formatCategoryLabel } from '@/lib/categories';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,7 @@ interface TransactionCardProps {
   type: 'income' | 'expense';
   name: string;
   amount: number;
-  category: string;
+  category?: string | null;
   date: string | { toDate: () => Date };
   icon?: React.ReactNode;
   onClick?: () => void;
@@ -57,7 +58,9 @@ export function TransactionCard({
 
       <div className="flex-1 min-w-0">
         <h4 className="truncate">{name}</h4>
-        <p className="text-sm text-muted-foreground">{category}</p>
+        <p className="text-sm text-muted-foreground">
+          {formatCategoryLabel(category ?? '')}
+        </p>
       </div>
 
       <div className="flex items-center gap-2">

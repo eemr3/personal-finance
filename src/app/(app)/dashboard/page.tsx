@@ -26,6 +26,7 @@ import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { formatBRL } from '@/lib/format';
+import { formatCategoryLabel } from '@/lib/categories';
 import { LogOut, TrendingDown, TrendingUp } from 'lucide-react';
 
 const CATEGORY_COLORS = [
@@ -119,12 +120,12 @@ function DashboardPage() {
   const categoryData = useMemo(() => {
     const byCategory: Record<string, number> = {};
     for (const t of allExpenses) {
-      const cat = t.category || 'Outros';
+      const cat = t.category || 'outros';
       byCategory[cat] = (byCategory[cat] ?? 0) + Number(t.amount ?? 0);
     }
     const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
-    return entries.map(([name], i) => ({
-      name,
+    return entries.map(([key], i) => ({
+      name: formatCategoryLabel(key),
       value: entries[i][1],
       color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
     }));

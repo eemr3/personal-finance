@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card } from './Card';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { formatCategoryLabel } from '@/lib/categories';
 
 interface RuleCardProps {
   id: string;
   name: string;
   condition: string;
   amount: string;
-  category: string;
+  category?: string | null;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -16,7 +17,7 @@ export function RuleCard({
   name,
   condition,
   amount,
-  category,
+  category = '',
   onEdit,
   onDelete,
 }: RuleCardProps) {
@@ -33,7 +34,7 @@ export function RuleCard({
               {amount}
             </span>
             <span className="inline-block px-3 py-1 bg-muted text-muted-foreground rounded-lg text-sm">
-              {category}
+              {formatCategoryLabel(category)}
             </span>
           </div>
         </div>
@@ -61,7 +62,7 @@ export function RuleCard({
                   className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted rounded-lg transition-colors text-left"
                 >
                   <Edit size={18} />
-                  <span>Edit</span>
+                  <span>Editar</span>
                 </button>
                 <button
                   onClick={() => {
@@ -71,7 +72,7 @@ export function RuleCard({
                   className="w-full flex items-center gap-3 px-3 py-2 hover:bg-danger/10 text-danger rounded-lg transition-colors text-left"
                 >
                   <Trash2 size={18} />
-                  <span>Delete</span>
+                  <span>Excluir</span>
                 </button>
               </div>
             </>

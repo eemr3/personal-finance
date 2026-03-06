@@ -41,7 +41,7 @@ export function calculateExpensesFromRules(
     type: 'expense' as const,
     name: rule.name,
     amount: calculateRuleAmount(rule.amount, totalIncome, rule.amountType),
-    category: rule.category,
+    category: rule.category ?? '',
     date: dateStr,
     source: 'rule' as const,
     ruleId: rule.id,
