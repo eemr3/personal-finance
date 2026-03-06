@@ -39,7 +39,7 @@ export function Header({
   return (
     <div className="bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 px-6 pt-6 pb-8 rounded-b-4xl shadow-lg">
       {/* Top bar - Avatar, Nome e Ações */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-betwenpen mb-8">
         {/* User Info */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
