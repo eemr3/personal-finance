@@ -1,28 +1,32 @@
 'use client';
 import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { signInWithGoogle } from '../../../services/auth/googleAuth';
 import Image from 'next/image';
 
+const DEFAULT_REDIRECT = '/dashboard';
+
 function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
   const { user } = useAuth();
+  const redirect = searchParams.get('redirect') ?? DEFAULT_REDIRECT;
+  const redirectTo = redirect.startsWith('/') ? redirect : DEFAULT_REDIRECT;
 
   useEffect(() => {
     if (user) {
-      router.push('/dashboard');
+      router.replace(redirectTo);
     }
-  }, [user]);
+  }, [user, router, redirectTo]);
 
   async function handleGoogleLogin() {
     try {
-      const result = await signInWithGoogle();
-      router.push('/dashboard');
-      console.log(result.user);
+      await signInWithGoogle();
+      router.replace(redirectTo);
     } catch (error) {
       console.error(error);
     }

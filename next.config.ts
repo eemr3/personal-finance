@@ -17,7 +17,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // ADICIONE ESTE BLOCO AQUI:
+  async rewrites() {
+    return [
+      {
+        source: '/.well-known/assetlinks.json',
+        destination: '/assetlinks.json',
+      },
+    ];
+  },
 };
 
-// Type assertion needed: next-pwa types bundle an older Next.js config shape
-export default withPWA(nextConfig as Parameters<typeof withPWA>[0]);
+export default withPWA(nextConfig as any);
