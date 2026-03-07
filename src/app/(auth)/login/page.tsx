@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { signInWithGoogle } from '../../../services/auth/googleAuth';
@@ -9,7 +9,7 @@ import Image from 'next/image';
 
 const DEFAULT_REDIRECT = '/dashboard';
 
-function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
@@ -158,4 +158,21 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+function LoginPageFallback() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="animate-pulse flex flex-col items-center gap-4">
+        <div className="w-[125px] h-[125px] rounded-full bg-muted" />
+        <div className="h-4 w-48 rounded bg-muted" />
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
