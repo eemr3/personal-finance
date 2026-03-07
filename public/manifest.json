@@ -21,10 +21,10 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "maskable",
+      "sizes": "1024x1024",
+      "src": "/icons/icon-1024.png",
+      "type": "image/png"
     }
   ]
 }
