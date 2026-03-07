@@ -6,12 +6,10 @@ import { RuleCard } from '@/components/RuleCard';
 import { Input, Select } from '@/components/Input';
 import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { BottomNav } from '../../../../components/BottomNav';
 
-type ConditionType =
-  | 'always'
-  | 'income_above'
-  | 'day_of_month'
-  | 'custom';
+type ConditionType = 'always' | 'income_above' | 'day_of_month' | 'custom';
 
 const CONDITION_TYPE_OPTIONS: { value: ConditionType; label: string }[] = [
   { value: 'always', label: 'Sempre aplicar' },
@@ -25,13 +23,16 @@ function buildConditionString(
   incomeMin: string,
   day: string,
   custom: string,
+  currencySymbol = 'R$',
 ): string {
   switch (type) {
     case 'always':
       return 'Sempre aplicar';
     case 'income_above': {
-      const n = incomeMin.replace(/\D/g, '');
-      return n ? `Se receita > R$ ${Number(n).toLocaleString('pt-BR')}` : 'Sempre aplicar';
+      const normalized = incomeMin.replace(/\./g, '').replace(',', '.');
+      const num = parseFloat(normalized);
+      if (Number.isNaN(num) || num <= 0) return 'Sempre aplicar';
+      return `Se receita > ${currencySymbol} ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     case 'day_of_month':
       return day ? `Mensalmente no dia ${day}` : 'Sempre aplicar';
@@ -55,12 +56,24 @@ function parseCondition(condition: string): {
   }
   // "if income > 3200", "receita > 3000", "Se receita > R$ 3.000"
   if (lower.includes('income') || lower.includes('receita')) {
-    const num = c.replace(/[^\d,.]/g, '').replace(',', '.').replace(/\.(?=.*\.)/g, '');
-    if (num) return { type: 'income_above', incomeMin: num, day: '', custom: '' };
+    const num = c
+      .replace(/[^\d,.]/g, '')
+      .replace(',', '.')
+      .replace(/\.(?=.*\.)/g, '');
+    if (num)
+      return { type: 'income_above', incomeMin: num, day: '', custom: '' };
   }
-  const dayMatch = c.match(/dia\s*(\d{1,2})|(\d{1,2})\s*do\s*mês|mensalmente\s*no\s*dia\s*(\d{1,2})|day\s*(\d{1,2})/i);
+  const dayMatch = c.match(
+    /dia\s*(\d{1,2})|(\d{1,2})\s*do\s*mês|mensalmente\s*no\s*dia\s*(\d{1,2})|day\s*(\d{1,2})/i,
+  );
   if (dayMatch) {
-    const d = (dayMatch[1] || dayMatch[2] || dayMatch[3] || dayMatch[4] || '').trim();
+    const d = (
+      dayMatch[1] ||
+      dayMatch[2] ||
+      dayMatch[3] ||
+      dayMatch[4] ||
+      ''
+    ).trim();
     if (d) return { type: 'day_of_month', incomeMin: '', day: d, custom: '' };
   }
   return { type: 'custom', incomeMin: '', day: '', custom: c };
@@ -76,6 +89,7 @@ interface Rule {
 
 function FixedExpensesPage() {
   const router = useRouter();
+  const { currencySymbol } = useFormatCurrency();
   const { rules, loading, fetchRules, addRule, updateRule, deleteRule } =
     useFixedExpenseRules();
   const [showModal, setShowModal] = useState(false);
@@ -174,6 +188,7 @@ function FixedExpensesPage() {
       formData.conditionIncomeMin,
       formData.conditionDay,
       formData.conditionCustom,
+      currencySymbol,
     );
     const payload = {
       name: formData.name.trim(),
@@ -292,7 +307,7 @@ function FixedExpensesPage() {
                 {formData.conditionType === 'income_above' && (
                   <div className="mt-3 relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      R$
+                      {currencySymbol}
                     </span>
                     <input
                       type="number"
@@ -321,7 +336,9 @@ function FixedExpensesPage() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          conditionDay: e.target.value.replace(/\D/g, '').slice(0, 2),
+                          conditionDay: e.target.value
+                            .replace(/\D/g, '')
+                            .slice(0, 2),
                         })
                       }
                       className="w-full mt-2 px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
@@ -331,7 +348,7 @@ function FixedExpensesPage() {
                 {formData.conditionType === 'custom' && (
                   <input
                     type="text"
-                    placeholder="Ex.: Se receita > R$ 5.000 e mês ímpar"
+                    placeholder={`Ex.: Se receita > ${currencySymbol} 5.000 e mês ímpar`}
                     value={formData.conditionCustom}
                     onChange={(e) =>
                       setFormData({
@@ -379,7 +396,7 @@ function FixedExpensesPage() {
 
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-                    {formData.amountType === 'fixed' ? 'R$' : '%'}
+                    {formData.amountType === 'fixed' ? currencySymbol : '%'}
                   </span>
                   <input
                     type="number"
@@ -422,6 +439,7 @@ function FixedExpensesPage() {
           </div>
         </div>
       )}
+      <BottomNav />
     </div>
   );
 }

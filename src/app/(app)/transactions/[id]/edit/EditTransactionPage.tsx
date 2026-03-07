@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { Input, TextArea, Select } from '@/components/Input';
 import { ArrowLeft } from 'lucide-react';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useTransactions } from '@/features/transactions/hooks/useTransactions';
 
 const incomeCategories = [
@@ -32,6 +33,7 @@ interface EditTransactionPageProps {
 
 export function EditTransactionPage({ id }: EditTransactionPageProps) {
   const router = useRouter();
+  const { currencySymbol } = useFormatCurrency();
   const { transactions, editTransaction, removeTransaction } = useTransactions();
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>(
     'expense',
@@ -151,7 +153,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
           <label className="text-sm text-foreground mb-2 block">Valor</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-              R$
+              {currencySymbol}
             </span>
             <input
               type="number"

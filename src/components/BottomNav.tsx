@@ -1,15 +1,18 @@
 'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { Home, Receipt, Settings } from 'lucide-react';
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   const navItems = [
-    { path: '/dashboard', icon: Home, label: 'Home' },
-    { path: '/transactions', icon: Receipt, label: 'Transactions' },
-    { path: '/settings', icon: Settings, label: 'Settings' },
+    { path: '/dashboard', icon: Home, labelKey: 'bottomNav.home' as const },
+    { path: '/transactions', icon: Receipt, labelKey: 'bottomNav.transactions' as const },
+    { path: '/settings', icon: Settings, labelKey: 'bottomNav.settings' as const },
   ];
 
   return (
@@ -32,7 +35,7 @@ export function BottomNav() {
               }`}
             >
               <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-xs">{item.label}</span>
+              <span className="text-xs">{t(item.labelKey)}</span>
             </Link>
           );
         })}

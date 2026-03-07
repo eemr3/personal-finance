@@ -2,11 +2,14 @@
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { signInWithGoogle } from '../../../services/auth/googleAuth';
+import Image from 'next/image';
 
 function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -26,7 +29,7 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -34,7 +37,7 @@ function LoginPage() {
         className="w-full max-w-md"
       >
         {/* Card principal */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+        <div className="bg-card text-card-foreground rounded-3xl shadow-xl p-8 md:p-12 border border-border">
           {/* Logo/Ícone */}
           <motion.div
             initial={{ scale: 0.8 }}
@@ -42,18 +45,25 @@ function LoginPage() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex justify-center mb-8"
           >
-            <div className="w-20 h-20 bg-linear-to-br from-emerald-400 to-teal-500 rounded-3xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-4xl font-bold">$</span>
+            <div className="w-[125px] h-[125px] bg-primary rounded flex items-center justify-center shadow-lg">
+              <span className="text-primary-foreground text-4xl font-bold">
+                <Image
+                  src="/icons/icon-512.png"
+                  alt="Logo"
+                  width={100}
+                  height={100}
+                />
+              </span>
             </div>
           </motion.div>
 
           {/* Título e Subtítulo */}
           <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">
-              Finanças Pessoais
+            <h1 className="text-3xl font-bold text-foreground mb-3">
+              {t('login.title')}
             </h1>
-            <p className="text-gray-600">
-              Acompanhe suas finanças com facilidade
+            <p className="text-muted-foreground">
+              {t('login.subtitle')}
             </p>
           </div>
 
@@ -62,7 +72,7 @@ function LoginPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
-            className="w-full bg-white border-2 border-gray-200 rounded-xl py-4 px-6 flex items-center justify-center gap-3 hover:border-gray-300 hover:shadow-md transition-all duration-200 group"
+            className="w-full bg-card border-2 border-border rounded-xl py-4 px-6 flex items-center justify-center gap-3 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-200 group"
           >
             {/* Ícone do Google */}
             <svg className="w-6 h-6" viewBox="0 0 24 24">
@@ -84,21 +94,21 @@ function LoginPage() {
               />
             </svg>
 
-            <span className="text-gray-700 font-medium">
-              Continuar com Google
+            <span className="text-foreground font-medium">
+              {t('login.continueWithGoogle')}
             </span>
           </motion.button>
 
           {/* Texto de segurança */}
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Login seguro usando sua conta Google
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            {t('login.secureLogin')}
           </p>
 
           {/* Indicador de segurança */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <svg
-                className="w-4 h-4 text-emerald-500"
+                className="w-4 h-4 text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -110,7 +120,7 @@ function LoginPage() {
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                 />
               </svg>
-              <span>Conexão segura e criptografada</span>
+              <span>{t('login.secureConnection')}</span>
             </div>
           </div>
         </div>
@@ -120,22 +130,22 @@ function LoginPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 text-center text-sm text-gray-600"
+          className="mt-6 text-center text-sm text-muted-foreground"
         >
           <p>
-            Ao continuar, você concorda com nossos{' '}
+            {t('login.termsPrefix')}{' '}
             <a
               href="#"
-              className="text-emerald-600 hover:text-emerald-700 underline"
+              className="text-primary hover:opacity-90 underline"
             >
-              Termos de Uso
+              {t('login.termsOfUse')}
             </a>{' '}
-            e{' '}
+            {t('login.and')}{' '}
             <a
               href="#"
-              className="text-emerald-600 hover:text-emerald-700 underline"
+              className="text-primary hover:opacity-90 underline"
             >
-              Política de Privacidade
+              {t('login.privacyPolicy')}
             </a>
           </p>
         </motion.div>

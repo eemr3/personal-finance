@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Bar,
@@ -17,17 +16,20 @@ import {
 } from 'recharts';
 
 import { BottomNav } from '@/components/BottomNav';
+import { AppHeader } from '@/components/AppHeader';
 import { Button } from '@/components/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { FinanceSummaryCard } from '@/components/FinanceSummaryCard';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { PeriodSelector } from '@/components/PeriodSelector';
+import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
-import { formatBRL } from '@/lib/format';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { formatCategoryLabel } from '@/lib/categories';
-import { LogOut, TrendingDown, TrendingUp } from 'lucide-react';
+import { Plus, TrendingDown, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const CATEGORY_COLORS = [
   '#10b981',
@@ -76,6 +78,8 @@ function getMonthKey(t: {
 
 function DashboardPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const {
     allTransactionsForDisplay,
     allExpenses,
@@ -146,37 +150,47 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-linear-to-b from-primary/10 to-transparent px-6 pt-8 pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Image
-              src={user?.photoURL || '/avatar.png'}
-              alt={user?.displayName || 'User'}
-              width={44}
-              height={44}
-              className="rounded-full border"
-            />
+      <div className="px-4 pb-4">
+        <AppHeader
+          title={<>{t('dashboard.title')}</>}
+          subtitle={t('dashboard.subtitle')}
+        />
+      </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Bem-vindo</span>
-
-              <h2 className="font-semibold text-lg leading-none">
-                {user?.displayName}
-              </h2>
-            </div>
-          </div>
-
-          <Button variant="ghost" size="sm" onClick={logout}>
-            <LogOut size={24} />
-          </Button>
-        </div>
-        <div className="mb-4">
+      <div className="px-6 pt-4">
+        {/* Barra de mês: apenas desktop. No mobile usa o pill abaixo. */}
+        <div className="hidden md:block mb-4">
           <PeriodSelector />
         </div>
-        <div className="mb-6">
+
+        {/* No mobile: pill de mês no lugar dos dois botões. No desktop: dois botões. */}
+        <div className="flex gap-3 mb-6 relative z-10">
+          <div className="md:hidden flex items-center min-h-[44px]">
+            <MonthSelector />
+          </div>
+          <div className="hidden md:flex flex-1 gap-3">
+            <Button
+              className="flex-1 py-4 bg-success text-success-foreground"
+              onClick={() => router.push('/transactions/new?type=income')}
+            >
+              <Plus size={20} className="mr-2" />
+              Adicionar receita
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 py-4 border-2"
+              onClick={() => router.push('/transactions/new?type=expense')}
+            >
+              <Plus size={20} className="mr-2" />
+              Adicionar despesa
+            </Button>
+          </div>
+        </div>
+
+        <div className="mb-6 relative z-0">
           <p className="text-muted-foreground mb-1">Saldo total</p>
-          <h1 className="text-4xl">
-            R$ {formatBRL(totalIncome - totalExpenses)}
+          <h1 className="text-4xl break-keep tabular-nums">
+            {formatCurrency(totalIncome - totalExpenses)}
           </h1>
         </div>
 
@@ -218,18 +232,37 @@ function DashboardPage() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `R$ ${formatBRL(value)}`}
+                  tickFormatter={(value) => formatCurrency(value)}
                 />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'var(--card)',
                     border: '1px solid var(--border)',
-                    borderRadius: '12px',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    maxWidth: '200px',
                   }}
-                  formatter={(value, name) => [
-                    `R$ ${formatBRL(Number(value))}`,
-                    name === 'receitas' ? 'Receitas' : 'Despesas',
-                  ]}
+                  wrapperStyle={{ outline: 'none' }}
+                  cursor={{ fill: 'var(--muted)', fillOpacity: 0.15 }}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length || !label) return null;
+                    return (
+                      <div className="shadow-md rounded-lg border border-border bg-card p-2.5">
+                        <p className="text-xs font-medium text-muted-foreground mb-1.5">
+                          {label}
+                        </p>
+                        {payload.map((entry) => (
+                          <p
+                            key={entry.dataKey}
+                            className="text-sm font-medium tabular-nums"
+                            style={{ color: entry.color }}
+                          >
+                            {entry.name}: {formatCurrency(Number(entry.value ?? 0))}
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  }}
                 />
                 <Bar
                   dataKey="receitas"
@@ -286,7 +319,7 @@ function DashboardPage() {
                       <span className="text-sm">{category.name}</span>
                     </div>
                     <span className="text-sm font-medium">
-                      R$ {formatBRL(category.value)}
+                      {formatCurrency(category.value)}
                     </span>
                   </div>
                 ))}

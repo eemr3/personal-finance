@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 
-import { formatBRL, formatDate } from '@/lib/format';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { useFormatDate } from '@/hooks/useFormatDate';
 import { formatCategoryLabel } from '@/lib/categories';
 import {
   DropdownMenu,
@@ -36,6 +39,8 @@ export function TransactionCard({
   onEdit,
   onDelete,
 }: TransactionCardProps) {
+  const { formatCurrency } = useFormatCurrency();
+  const { formatDate } = useFormatDate();
   const isIncome = type === 'income';
   const amountColor = isIncome ? 'text-success' : 'text-danger';
   const canEdit = source !== 'rule' && (onEdit || onDelete);
@@ -63,22 +68,22 @@ export function TransactionCard({
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="text-right">
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="text-right min-w-[100px]">
           <p className={`font-medium ${amountColor}`}>
-            {isIncome ? '+' : '-'}R$ {formatBRL(Number(amount))}
+            {isIncome ? '+' : '-'} {formatCurrency(Number(amount))}
           </p>
           <p className="text-xs text-muted-foreground">{formatDate(date)}</p>
           {source === 'rule' && (
             <span className="text-xs text-muted-foreground">(regra)</span>
           )}
         </div>
-        {canEdit && (
+        {canEdit ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
                 onClick={(e) => e.stopPropagation()}
                 aria-label="Ações"
               >
@@ -103,6 +108,8 @@ export function TransactionCard({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+        ) : (
+          <span className="w-10 h-10 shrink-0" aria-hidden />
         )}
       </div>
     </div>

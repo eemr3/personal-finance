@@ -1,0 +1,80 @@
+{
+  "common": {
+    "appName": "Finanças Pessoais",
+    "loading": "Carregando...",
+    "back": "Voltar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "return": "Voltar"
+  },
+  "login": {
+    "title": "Finanças Pessoais",
+    "subtitle": "Acompanhe suas finanças com facilidade",
+    "continueWithGoogle": "Continuar com Google",
+    "secureLogin": "Login seguro usando sua conta Google",
+    "secureConnection": "Conexão segura e criptografada",
+    "termsPrefix": "Ao continuar, você concorda com nossos",
+    "termsOfUse": "Termos de Uso",
+    "and": "e",
+    "privacyPolicy": "Política de Privacidade"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Aqui está sua visão geral financeira"
+  },
+  "header": {
+    "openMenu": "Abrir menu",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "logout": "Sair"
+  },
+  "transactions": {
+    "title": "Transações",
+    "subtitle": "Acompanhe suas receitas e despesas"
+  },
+  "settings": {
+    "subtitle": "Gerencie as preferências do app",
+    "fixedExpenseRules": {
+      "description": "Configure regras de despesas fixas"
+    },
+    "appearance": {
+      "description": "Personalize o tema e a exibição do app"
+    },
+    "profile": {
+      "description": "Gerencie suas informações pessoais",
+      "subtitle": "Gerencie suas informações pessoais",
+      "personalInformation": "Informações Pessoais",
+      "accountInformation": "Informações da Conta",
+      "memberSince": "Membro desde",
+      "accountId": "ID da Conta",
+      "provider": "Provedor",
+      "fullName": "Nome Completo",
+      "email": "Email",
+      "providerName": "Google"
+    }
+  },
+  "bottomNav": {
+    "home": "Início",
+    "transactions": "Transações",
+    "settings": "Configurações"
+  },
+  "monthSelector": {
+    "ariaLabel": "Selecionar mês"
+  },
+  "months": {
+    "1": "Janeiro",
+    "2": "Fevereiro",
+    "3": "Março",
+    "4": "Abril",
+    "5": "Maio",
+    "6": "Junho",
+    "7": "Julho",
+    "8": "Agosto",
+    "9": "Setembro",
+    "10": "Outubro",
+    "11": "Novembro",
+    "12": "Dezembro"
+  }
+}

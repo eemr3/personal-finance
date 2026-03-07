@@ -21,7 +21,7 @@ export function Input({
         <label className="text-sm text-foreground">{label}</label>
       )}
       <input
-        className={`px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all ${widthStyle} ${className}`}
+        className={`px-4 py-3 bg-input-background text-foreground placeholder:text-muted-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all ${widthStyle} ${className}`}
         {...props}
       />
       {error && <span className="text-sm text-danger">{error}</span>}
@@ -50,7 +50,7 @@ export function TextArea({
         <label className="text-sm text-foreground">{label}</label>
       )}
       <textarea
-        className={`px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all min-h-[100px] resize-y ${widthStyle} ${className}`}
+        className={`px-4 py-3 bg-input-background text-foreground placeholder:text-muted-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all min-h-[100px] resize-y ${widthStyle} ${className}`}
         {...props}
       />
       {error && <span className="text-sm text-danger">{error}</span>}
@@ -81,7 +81,7 @@ export function Select({
         <label className="text-sm text-foreground">{label}</label>
       )}
       <select
-        className={`px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all appearance-none ${widthStyle} ${className}`}
+        className={`px-4 py-3 bg-input-background text-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all appearance-none ${widthStyle} ${className}`}
         {...props}
       >
         {options.map((option) => (

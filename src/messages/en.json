@@ -1,0 +1,75 @@
+{
+  "common": {
+    "appName": "Personal Finance",
+    "loading": "Loading...",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Here's your financial overview",
+    "hello": "Hello",
+    "financialOverview": "Here's your financial overview"
+  },
+  "header": {
+    "openMenu": "Open menu",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Log out",
+    "return": "Go back"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Track your income and expenses"
+  },
+  "settings": {
+    "subtitle": "Manage your app preferences",
+    "profile": {
+      "subtitle": "Manage your personal information",
+      "personalInformation": "Personal Information",
+      "accountInformation": "Account Information",
+      "memberSince": "Member since",
+      "accountId": "Account ID",
+      "provider": "Provider",
+      "fullName": "Full Name",
+      "email": "Email",
+      "providerName": "Google"
+    }
+  },
+  "bottomNav": {
+    "home": "Home",
+    "transactions": "Transactions",
+    "settings": "Settings"
+  },
+  "monthSelector": {
+    "ariaLabel": "Select month"
+  },
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  },
+  "login": {
+    "title": "Personal Finance",
+    "subtitle": "Track your finances with ease",
+    "continueWithGoogle": "Continue with Google",
+    "secureLogin": "Secure login using your Google account",
+    "secureConnection": "Secure and encrypted connection",
+    "termsPrefix": "By continuing, you agree to our",
+    "termsOfUse": "Terms of Use",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy"
+  }
+}

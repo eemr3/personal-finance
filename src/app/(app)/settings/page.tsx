@@ -1,5 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { Card } from '@/components/Card';
 import {
@@ -14,6 +16,7 @@ import { useAuth } from '../../../features/auth/hooks/useAuth';
 
 function SettingsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { logout } = useAuth();
   const settingsSections = [
     {
@@ -22,8 +25,8 @@ function SettingsPage() {
         {
           icon: <User size={24} />,
           label: 'Profile',
-          description: 'Manage your personal information',
-          onClick: () => console.log('Profile'),
+          description: `${t('settings.profile.description')}`,
+          onClick: () => router.push('/settings/profile'),
         },
       ],
     },
@@ -33,7 +36,7 @@ function SettingsPage() {
         {
           icon: <Calculator size={24} />,
           label: 'Fixed Expense Rules',
-          description: 'Configure automatic expense rules',
+          description: `${t('settings.fixedExpenseRules.description')}`,
           onClick: () => router.push('/settings/fixed-expenses'),
         },
       ],
@@ -42,16 +45,10 @@ function SettingsPage() {
       title: 'Preferences',
       items: [
         {
-          icon: <Bell size={24} />,
-          label: 'Notifications',
-          description: 'Manage notification preferences',
-          onClick: () => console.log('Notifications'),
-        },
-        {
           icon: <Palette size={24} />,
           label: 'Appearance',
-          description: 'Customize app theme and display',
-          onClick: () => console.log('Appearance'),
+          description: `${t('settings.appearance.description')}`,
+          onClick: () => router.push('/settings/appearance'),
         },
       ],
     },
@@ -64,12 +61,14 @@ function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-linear-to-b from-primary/10 to-transparent px-6 pt-8 pb-6">
-        <h1 className="mb-2">Settings</h1>
-        <p className="text-muted-foreground">Manage your app preferences</p>
+      <div className="px-4 pb-4">
+        <AppHeader
+          title={t('header.settings')}
+          subtitle={t('settings.subtitle')}
+        />
       </div>
 
-      <div className="px-6 space-y-6">
+      <div className="px-6 pt-4 space-y-6">
         {settingsSections.map((section) => (
           <div key={section.title}>
             <h3 className="mb-3 text-sm text-muted-foreground uppercase tracking-wide">

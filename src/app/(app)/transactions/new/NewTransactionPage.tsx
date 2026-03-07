@@ -1,21 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { Input, TextArea, Select } from '@/components/Input';
 import { ArrowLeft } from 'lucide-react';
 import { createTransaction } from '@/services/transactions/transactions.service';
 import { useTransactions } from '../../../../features/transactions/hooks/useTransactions';
 import { usePeriod } from '@/contexts/PeriodContext';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { getPeriodRange } from '@/lib/period';
 
 export function NewTransactionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get('type');
+  const initialType: 'income' | 'expense' =
+    typeParam === 'income' ? 'income' : 'expense';
   const { addTransaction } = useTransactions();
   const { period } = usePeriod();
+  const { currencySymbol } = useFormatCurrency();
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>(
-    'expense',
+    initialType,
   );
   const [formData, setFormData] = useState({
     name: '',
@@ -117,7 +123,7 @@ export function NewTransactionPage() {
           <label className="text-sm text-foreground mb-2 block">Valor</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-              R$
+              {currencySymbol}
             </span>
             <input
               type="number"
@@ -127,7 +133,7 @@ export function NewTransactionPage() {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className="w-full pl-10 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all text-2xl"
+              className="w-full pl-10 ml-2 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all text-2xl"
               required
             />
           </div>

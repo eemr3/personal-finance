@@ -3,13 +3,15 @@
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { PeriodSelector } from '@/components/PeriodSelector';
+import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
-import { formatBRL } from '@/lib/format';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 
 const FILTER_OPTIONS = [
   { value: 'all' as const, label: 'All' },
@@ -19,6 +21,8 @@ const FILTER_OPTIONS = [
 
 function TransactionsPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const {
     allTransactionsForDisplay,
     totalIncome,
@@ -57,20 +61,26 @@ function TransactionsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-linear-to-b from-primary/10 to-transparent px-6 pt-8 pb-6">
-        <h1 className="mb-4">Transações</h1>
-        <div className="mb-6">
-          <PeriodSelector />
+      <div className="px-4 pb-4">
+        <AppHeader
+          title={t('transactions.title')}
+          subtitle={t('transactions.subtitle')}
+        />
+      </div>
+
+      <div className="px-6 pt-4">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <MonthSelector />
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-card rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Total Income</p>
-            <p className="text-xl text-success">R$ {formatBRL(totalIncome)}</p>
+            <p className="text-sm text-muted-foreground mb-1">Total receitas</p>
+            <p className="text-xl text-success">{formatCurrency(totalIncome)}</p>
           </div>
           <div className="bg-card rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Total Expenses</p>
-            <p className="text-xl text-danger">R$ {formatBRL(totalExpenses)}</p>
+            <p className="text-sm text-muted-foreground mb-1">Total despesas</p>
+            <p className="text-xl text-danger">{formatCurrency(totalExpenses)}</p>
           </div>
         </div>
 

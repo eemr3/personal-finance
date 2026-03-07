@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import { Card, CardContent } from './Card';
-import { formatBRL } from '../lib/format';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 
 interface FinanceSummaryCardProps {
   title: string;
@@ -17,6 +19,7 @@ export function FinanceSummaryCard({
   variant = 'balance',
   subtitle,
 }: FinanceSummaryCardProps) {
+  const { formatCurrency } = useFormatCurrency();
   const variantStyles = {
     income: 'text-success',
     expense: 'text-danger',
@@ -40,7 +43,7 @@ export function FinanceSummaryCard({
           </div>
         </div>
         <p className="text-sm text-muted-foreground mb-1">{title}</p>
-        <h2 className={variantStyles[variant]}>R$ {formatBRL(amount)}</h2>
+        <h2 className={variantStyles[variant]}>{formatCurrency(amount)}</h2>
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
         )}

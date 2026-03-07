@@ -1,0 +1,75 @@
+{
+  "common": {
+    "appName": "Finanzas Personales",
+    "loading": "Cargando...",
+    "back": "Volver",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "return": "Volver"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Aquí está tu resumen financiero",
+    "hello": "Hola",
+    "financialOverview": "Aquí está tu resumen financiero"
+  },
+  "header": {
+    "openMenu": "Abrir menú",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  },
+  "transactions": {
+    "title": "Transacciones",
+    "subtitle": "Controla tus ingresos y gastos"
+  },
+  "settings": {
+    "subtitle": "Gestiona las preferencias de la app",
+    "profile": {
+      "subtitle": "Gestiona tus información personal",
+      "personalInformation": "Información Personal",
+      "accountInformation": "Información de la Cuenta",
+      "memberSince": "Miembro desde",
+      "accountId": "ID de la Cuenta",
+      "provider": "Proveedor",
+      "fullName": "Nombre Completo",
+      "email": "Email",
+      "providerName": "Google"
+    }
+  },
+  "bottomNav": {
+    "home": "Inicio",
+    "transactions": "Transacciones",
+    "settings": "Configuración"
+  },
+  "monthSelector": {
+    "ariaLabel": "Seleccionar mes"
+  },
+  "months": {
+    "1": "Enero",
+    "2": "Febrero",
+    "3": "Marzo",
+    "4": "Abril",
+    "5": "Mayo",
+    "6": "Junio",
+    "7": "Julio",
+    "8": "Agosto",
+    "9": "Septiembre",
+    "10": "Octubre",
+    "11": "Noviembre",
+    "12": "Diciembre"
+  },
+  "login": {
+    "title": "Finanzas Personales",
+    "subtitle": "Controla tus finanzas con facilidad",
+    "continueWithGoogle": "Continuar con Google",
+    "secureLogin": "Inicio de sesión seguro con tu cuenta de Google",
+    "secureConnection": "Conexión segura y cifrada",
+    "termsPrefix": "Al continuar, aceptas nuestros",
+    "termsOfUse": "Términos de Uso",
+    "and": "y",
+    "privacyPolicy": "Política de Privacidad"
+  }
+}
