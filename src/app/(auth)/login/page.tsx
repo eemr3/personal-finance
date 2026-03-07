@@ -49,15 +49,13 @@ function LoginPageContent() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex justify-center mb-8"
           >
-            <div className="w-[125px] h-[125px] bg-primary rounded flex items-center justify-center shadow-lg">
-              <span className="text-primary-foreground text-4xl font-bold">
-                <Image
-                  src="/icons/icon-512.png"
-                  alt="Logo"
-                  width={100}
-                  height={100}
-                />
-              </span>
+            <div className="w-[150px] h-[150px] flex items-center justify-center shadow-lg">
+              <Image
+                src="/icons/icon-512.png"
+                alt="Logo"
+                width={100}
+                height={100}
+              />
             </div>
           </motion.div>
 
@@ -66,9 +64,7 @@ function LoginPageContent() {
             <h1 className="text-3xl font-bold text-foreground mb-3">
               {t('login.title')}
             </h1>
-            <p className="text-muted-foreground">
-              {t('login.subtitle')}
-            </p>
+            <p className="text-muted-foreground">{t('login.subtitle')}</p>
           </div>
 
           {/* Botão Google */}
@@ -138,17 +134,11 @@ function LoginPageContent() {
         >
           <p>
             {t('login.termsPrefix')}{' '}
-            <a
-              href="#"
-              className="text-primary hover:opacity-90 underline"
-            >
+            <a href="#" className="text-primary hover:opacity-90 underline">
               {t('login.termsOfUse')}
             </a>{' '}
             {t('login.and')}{' '}
-            <a
-              href="#"
-              className="text-primary hover:opacity-90 underline"
-            >
+            <a href="#" className="text-primary hover:opacity-90 underline">
               {t('login.privacyPolicy')}
             </a>
           </p>
