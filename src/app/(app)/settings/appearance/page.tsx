@@ -18,9 +18,11 @@ import {
   Monitor,
   DollarSign,
   Calendar,
-  Globe,
   Check,
 } from 'lucide-react';
+import US from 'country-flag-icons/react/3x2/US';
+import ES from 'country-flag-icons/react/3x2/ES';
+import BR from 'country-flag-icons/react/3x2/BR';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -100,10 +102,14 @@ function AppearancePage() {
     { value: 'ymd', label: 'YYYY-MM-DD', example: '2026-03-07' },
   ];
 
-  const languageOptions: { value: AppearanceLanguage; label: string; flag: string }[] = [
-    { value: 'en', label: 'English', flag: '🇺🇸' },
-    { value: 'pt', label: 'Português', flag: '🇧🇷' },
-    { value: 'es', label: 'Español', flag: '🇪🇸' },
+  const languageOptions: {
+    value: AppearanceLanguage;
+    label: string;
+    Flag: React.ComponentType<{ className?: string }>;
+  }[] = [
+    { value: 'en', label: 'English', Flag: US },
+    { value: 'pt', label: 'Português', Flag: BR },
+    { value: 'es', label: 'Español', Flag: ES },
   ];
 
   return (
@@ -277,17 +283,15 @@ function AppearancePage() {
                     className="w-full flex items-center gap-4 p-3 -m-3 rounded-xl hover:bg-accent transition-colors"
                   >
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                      className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${
                         language === option.value
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-primary/10'
                       }`}
                     >
-                      {language === option.value ? (
-                        <Globe size={24} className="text-primary-foreground" />
-                      ) : (
-                        option.flag
-                      )}
+                      <span className="inline-flex w-8 h-6 shrink-0 [&_svg]:w-full [&_svg]:h-full [&_svg]:block">
+                        <option.Flag />
+                      </span>
                     </div>
                     <div className="flex-1 text-left">
                       <h4>{option.label}</h4>
