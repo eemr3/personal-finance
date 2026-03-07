@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/.well-known/assetlinks.json',
-        destination: '/assetlinks.json',
+        destination: '/.well-known/assetlinks.json',
       },
     ];
   },
