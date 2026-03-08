@@ -1,7 +1,13 @@
 'use client';
 
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useFormatDate } from '@/hooks/useFormatDate';
@@ -12,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useTranslation } from 'react-i18next';
 
 interface TransactionCardProps {
   id: string;
@@ -44,6 +51,7 @@ export function TransactionCard({
   const isIncome = type === 'income';
   const amountColor = isIncome ? 'text-success' : 'text-danger';
   const canEdit = source !== 'rule' && (onEdit || onDelete);
+  const { t } = useTranslation();
 
   return (
     <div
@@ -75,7 +83,9 @@ export function TransactionCard({
           </p>
           <p className="text-xs text-muted-foreground">{formatDate(date)}</p>
           {source === 'rule' && (
-            <span className="text-xs text-muted-foreground">(regra)</span>
+            <span className="text-xs text-muted-foreground">
+              ({t('settings.fixedExpenseRules.rule')})
+            </span>
           )}
         </div>
         {canEdit ? (
@@ -92,14 +102,22 @@ export function TransactionCard({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {onEdit && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                >
                   <Pencil size={16} className="mr-2" />
                   Editar
                 </DropdownMenuItem>
               )}
               {onDelete && (
                 <DropdownMenuItem
-                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
                   className="text-danger"
                 >
                   <Trash2 size={16} className="mr-2" />

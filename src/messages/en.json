@@ -27,6 +27,10 @@
   },
   "settings": {
     "subtitle": "Manage your app preferences",
+    "fixedExpenseRules": {
+      "description": "Configure fixed expense rules",
+      "rule": "rule"
+    },
     "profile": {
       "subtitle": "Manage your personal information",
       "personalInformation": "Personal Information",

@@ -27,6 +27,10 @@
   },
   "settings": {
     "subtitle": "Gestiona las preferencias de la app",
+    "fixedExpenseRules": {
+      "description": "Configura reglas de gastos fijos",
+      "rule": "regla"
+    },
     "profile": {
       "subtitle": "Gestiona tus información personal",
       "personalInformation": "Información Personal",

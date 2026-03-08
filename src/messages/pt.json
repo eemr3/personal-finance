@@ -37,7 +37,8 @@
   "settings": {
     "subtitle": "Gerencie as preferências do app",
     "fixedExpenseRules": {
-      "description": "Configure regras de despesas fixas"
+      "description": "Configure regras de despesas fixas",
+      "rule": "regra"
     },
     "appearance": {
       "description": "Personalize o tema e a exibição do app"
