@@ -8,7 +8,9 @@ interface RuleCardProps {
   name: string;
   condition: string;
   amount: string;
+  amountType?: 'fixed' | 'percentage';
   category?: string | null;
+  formatCurrency?: (value: number) => string;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -17,32 +19,42 @@ export function RuleCard({
   name,
   condition,
   amount,
+  amountType,
   category = '',
+  formatCurrency,
   onEdit,
   onDelete,
 }: RuleCardProps) {
   const [showMenu, setShowMenu] = React.useState(false);
 
+  const isPercentage = amountType === 'percentage' || amount.includes('%');
+  const displayAmount =
+    !isPercentage && formatCurrency
+      ? formatCurrency(parseFloat(amount.replace(',', '.')) || 0)
+      : amount;
+
   return (
-    <Card className="relative">
+    <Card className="relative border border-border rounded-xl hover:bg-accent/50 hover:border-border transition-all duration-200 ease-out">
       <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h4 className="mb-2">{name}</h4>
-          <p className="text-sm text-muted-foreground mb-1">{condition}</p>
-          <div className="flex items-center gap-3 mt-3">
-            <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm">
-              {amount}
+        <div className="flex-1 min-w-0">
+          <h4 className="font-medium text-foreground mb-1 truncate">{name}</h4>
+          <p className="text-sm text-muted-foreground mb-2">{condition}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="inline-block px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-medium">
+              {displayAmount}
             </span>
-            <span className="inline-block px-3 py-1 bg-muted text-muted-foreground rounded-lg text-sm">
+            <span className="inline-block px-3 py-1.5 bg-muted text-muted-foreground rounded-lg text-sm">
               {formatCategoryLabel(category)}
             </span>
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            className="p-2 hover:bg-muted rounded-lg transition-colors duration-200"
+            type="button"
+            aria-label="Ações"
           >
             <MoreVertical size={20} />
           </button>
@@ -55,21 +67,23 @@ export function RuleCard({
               />
               <div className="absolute right-0 top-10 bg-card border border-border rounded-xl shadow-lg p-2 min-w-[150px] z-20">
                 <button
+                  type="button"
                   onClick={() => {
                     setShowMenu(false);
                     onEdit?.();
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted rounded-lg transition-colors duration-200 text-left"
                 >
                   <Edit size={18} />
                   <span>Editar</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setShowMenu(false);
                     onDelete?.();
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-danger/10 text-danger rounded-lg transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-danger/10 text-danger rounded-lg transition-colors duration-200 text-left"
                 >
                   <Trash2 size={18} />
                   <span>Excluir</span>

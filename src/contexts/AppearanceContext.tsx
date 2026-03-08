@@ -59,7 +59,11 @@ interface AppearanceContextValue extends AppearanceState {
 
 const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 
-export function AppearanceProvider({ children }: { children: React.ReactNode }) {
+export function AppearanceProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [state, setState] = useState<AppearanceState>(() =>
     typeof window !== 'undefined' ? loadFromStorage() : defaultState,
   );

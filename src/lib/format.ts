@@ -9,11 +9,62 @@ const CURRENCY_CONFIG: Record<
   eur: { locale: 'de-DE', currency: 'EUR', symbol: '€' },
 };
 
+/** Padrão internacional: BRL "R$ 100", USD "$100", EUR "100 €" */
+export type CurrencyInputConfig = {
+  position: 'prefix' | 'suffix';
+  prefix: string;
+  suffix: string;
+};
+
 /**
  * Retorna o símbolo da moeda (ex: "R$", "$", "€").
  */
 export function getCurrencySymbol(currency: FormatCurrencyCode): string {
   return CURRENCY_CONFIG[currency].symbol;
+}
+
+/**
+ * Configuração para exibir moeda em inputs (símbolo + espaçamento conforme idioma).
+ * BRL: prefixo "R$ " (espaço após). USD: prefixo "$" (sem espaço). EUR: sufixo " €" (espaço antes).
+ */
+export function getCurrencyInputConfig(
+  currency: FormatCurrencyCode,
+): CurrencyInputConfig {
+  switch (currency) {
+    case 'brl':
+      return { position: 'prefix', prefix: 'R$ ', suffix: '' };
+    case 'usd':
+      return { position: 'prefix', prefix: '$', suffix: '' };
+    case 'eur':
+      return { position: 'suffix', prefix: '', suffix: ' €' };
+    default:
+      return { position: 'prefix', prefix: 'R$ ', suffix: '' };
+  }
+}
+
+/**
+ * Remove símbolos de moeda e % de uma string de valor (ex.: "R$ 1.234,56" → "1234.56", "10%" → "10").
+ * Aceita formato pt-BR (1.234,56) e en-US (1,234.56).
+ */
+export function stripCurrencyFromAmount(amountStr: string): string {
+  let s = amountStr.replace(/%/g, '').replace(/[R$\s€]/g, '').replace(/\s+/g, '').trim();
+  if (!s) return '';
+  const hasComma = s.includes(',');
+  const hasDot = s.includes('.');
+  if (hasComma && hasDot) {
+    const lastComma = s.lastIndexOf(',');
+    const lastDot = s.lastIndexOf('.');
+    if (lastComma > lastDot) {
+      s = s.replace(/\./g, '').replace(',', '.');
+    } else {
+      s = s.replace(/,/g, '');
+    }
+  } else if (hasComma) {
+    s = s.replace(',', '.');
+  } else if (hasDot) {
+    s = s.replace(/\.(?=.*\.)/g, '');
+  }
+  return s;
 }
 
 /**

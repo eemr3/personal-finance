@@ -7,6 +7,7 @@ import { Input, Select } from '@/components/Input';
 import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { stripCurrencyFromAmount } from '@/lib/format';
 import { BottomNav } from '../../../../components/BottomNav';
 
 type ConditionType = 'always' | 'income_above' | 'day_of_month' | 'custom';
@@ -23,7 +24,7 @@ function buildConditionString(
   incomeMin: string,
   day: string,
   custom: string,
-  currencySymbol = 'R$',
+  formatCurrency: (value: number) => string,
 ): string {
   switch (type) {
     case 'always':
@@ -32,7 +33,7 @@ function buildConditionString(
       const normalized = incomeMin.replace(/\./g, '').replace(',', '.');
       const num = parseFloat(normalized);
       if (Number.isNaN(num) || num <= 0) return 'Sempre aplicar';
-      return `Se receita > ${currencySymbol} ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      return `Se receita > ${formatCurrency(num)}`;
     }
     case 'day_of_month':
       return day ? `Mensalmente no dia ${day}` : 'Sempre aplicar';
@@ -84,12 +85,13 @@ interface Rule {
   name: string;
   condition: string;
   amount: string;
+  amountType?: 'fixed' | 'percentage';
   category: string;
 }
 
 function FixedExpensesPage() {
   const router = useRouter();
-  const { currencySymbol } = useFormatCurrency();
+  const { currencyInputConfig, formatCurrency } = useFormatCurrency();
   const { rules, loading, fetchRules, addRule, updateRule, deleteRule } =
     useFixedExpenseRules();
   const [showModal, setShowModal] = useState(false);
@@ -171,7 +173,7 @@ function FixedExpensesPage() {
       conditionDay: parsed.day,
       conditionCustom: parsed.custom,
       amountType: isPercentage ? 'percentage' : 'fixed',
-      amount: rule.amount.replace('$', '').replace('%', ''),
+      amount: stripCurrencyFromAmount(rule.amount),
       category: categoryValue,
     });
     setShowModal(true);
@@ -188,7 +190,7 @@ function FixedExpensesPage() {
       formData.conditionIncomeMin,
       formData.conditionDay,
       formData.conditionCustom,
-      currencySymbol,
+      formatCurrency,
     );
     const payload = {
       name: formData.name.trim(),
@@ -228,41 +230,55 @@ function FixedExpensesPage() {
         </p>
       </div>
 
-      <div className="px-6 space-y-3">
+      <div className="px-6 pt-2 pb-24 bg-linear-to-b from-primary/5 via-background to-background min-h-[50vh]">
         {rules.length > 0 ? (
-          rules.map((rule) => (
-            <RuleCard
-              key={rule.id}
-              id={rule.id}
-              name={rule.name}
-              condition={rule.condition}
-              amount={rule.amount}
-              category={rule.category ?? ''}
-              onEdit={() => handleEditRule(rule)}
-              onDelete={() => handleDeleteRule(rule.id)}
-            />
-          ))
+          <section className="mb-10">
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+              Regras
+            </h2>
+            <div className="space-y-2">
+              {rules.map((rule) => (
+                <RuleCard
+                  key={rule.id}
+                  id={rule.id}
+                  name={rule.name}
+                  condition={rule.condition}
+                  amount={rule.amount}
+                  amountType={rule.amountType}
+                  category={rule.category ?? ''}
+                  formatCurrency={formatCurrency}
+                  onEdit={() => handleEditRule(rule)}
+                  onDelete={() => handleDeleteRule(rule.id)}
+                />
+              ))}
+            </div>
+          </section>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">
-              Nenhuma regra configurada ainda
-            </p>
-            <Button onClick={handleAddRule}>Criar primeira regra</Button>
-          </div>
+          <section className="mb-10">
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+              Regras
+            </h2>
+            <div className="rounded-xl border border-border border-dashed bg-card/50 px-6 py-12 text-center">
+              <p className="text-muted-foreground mb-5">
+                Nenhuma regra configurada ainda
+              </p>
+              <Button onClick={handleAddRule}>Criar primeira regra</Button>
+            </div>
+          </section>
         )}
 
         {rules.length > 0 && (
-          <div className="pt-4">
-            <Button
-              fullWidth
-              onClick={handleAddRule}
-              variant="outline"
-              className="border-dashed"
-            >
-              <Plus size={20} className="mr-2" />
-              Nova regra
-            </Button>
-          </div>
+          <div className="h-px bg-border/60 mb-6" aria-hidden />
+        )}
+        {rules.length > 0 && (
+          <button
+            type="button"
+            onClick={handleAddRule}
+            className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl border border-dashed border-border bg-card hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 ease-out text-foreground"
+          >
+            <Plus size={20} />
+            Nova regra
+          </button>
         )}
       </div>
 
@@ -270,17 +286,22 @@ function FixedExpensesPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
           <div className="bg-background w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-              <h2>{editingRule ? 'Editar regra' : 'Nova regra'}</h2>
+              <h2 className="font-semibold text-lg">
+                {editingRule ? 'Editar regra' : 'Nova regra'}
+              </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                className="p-2 hover:bg-muted rounded-lg transition-colors duration-200"
+                type="button"
+                aria-label="Fechar"
               >
                 <X size={24} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              <Input
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <div>
+                <Input
                 label="Nome da regra"
                 placeholder="ex.: Pagamento Trybe"
                 value={formData.name}
@@ -288,10 +309,11 @@ function FixedExpensesPage() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-              />
+                />
+              </div>
 
               <div>
-                <label className="text-sm text-foreground mb-2 block">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
                   Condição
                 </label>
                 <Select
@@ -306,9 +328,16 @@ function FixedExpensesPage() {
                 />
                 {formData.conditionType === 'income_above' && (
                   <div className="mt-3 relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      {currencySymbol}
-                    </span>
+                    {currencyInputConfig.prefix ? (
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        {currencyInputConfig.prefix}
+                      </span>
+                    ) : null}
+                    {currencyInputConfig.suffix ? (
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        {currencyInputConfig.suffix}
+                      </span>
+                    ) : null}
                     <input
                       type="number"
                       min="0"
@@ -321,7 +350,11 @@ function FixedExpensesPage() {
                           conditionIncomeMin: e.target.value,
                         })
                       }
-                      className="w-full mt-2 pl-10 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+                      className={`w-full mt-2 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary ${
+                        currencyInputConfig.position === 'prefix'
+                          ? 'pl-10 pr-4'
+                          : 'pl-4 pr-10'
+                      }`}
                     />
                   </div>
                 )}
@@ -348,7 +381,7 @@ function FixedExpensesPage() {
                 {formData.conditionType === 'custom' && (
                   <input
                     type="text"
-                    placeholder={`Ex.: Se receita > ${currencySymbol} 5.000 e mês ímpar`}
+                    placeholder={`Ex.: Se receita > ${formatCurrency(5000)} e mês ímpar`}
                     value={formData.conditionCustom}
                     onChange={(e) =>
                       setFormData({
@@ -362,19 +395,19 @@ function FixedExpensesPage() {
               </div>
 
               <div>
-                <label className="text-sm text-foreground mb-2 block">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
                   Tipo de valor
                 </label>
-                <div className="flex gap-3 mb-3">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() =>
                       setFormData({ ...formData, amountType: 'fixed' })
                     }
-                    className={`flex-1 py-3 rounded-xl transition-all ${
+                    className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ease-out ${
                       formData.amountType === 'fixed'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border border-border'
+                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                        : 'bg-card border-border hover:bg-accent/80 text-muted-foreground'
                     }`}
                   >
                     Valor fixo
@@ -384,10 +417,10 @@ function FixedExpensesPage() {
                     onClick={() =>
                       setFormData({ ...formData, amountType: 'percentage' })
                     }
-                    className={`flex-1 py-3 rounded-xl transition-all ${
+                    className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ease-out ${
                       formData.amountType === 'percentage'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-card border border-border'
+                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                        : 'bg-card border-border hover:bg-accent/80 text-muted-foreground'
                     }`}
                   >
                     Percentual
@@ -395,9 +428,24 @@ function FixedExpensesPage() {
                 </div>
 
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-                    {formData.amountType === 'fixed' ? currencySymbol : '%'}
-                  </span>
+                  {formData.amountType === 'fixed' ? (
+                    <>
+                      {currencyInputConfig.prefix ? (
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                          {currencyInputConfig.prefix}
+                        </span>
+                      ) : null}
+                      {currencyInputConfig.suffix ? (
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                          {currencyInputConfig.suffix}
+                        </span>
+                      ) : null}
+                    </>
+                  ) : (
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                      %
+                    </span>
+                  )}
                   <input
                     type="number"
                     step="0.01"
@@ -406,23 +454,31 @@ function FixedExpensesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, amount: e.target.value })
                     }
-                    className="w-full pl-10 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                    className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                      formData.amountType === 'fixed'
+                        ? currencyInputConfig.position === 'prefix'
+                          ? 'pl-10 pr-4'
+                          : 'pl-4 pr-10'
+                        : 'pl-10 pr-4'
+                    }`}
                     required
                   />
                 </div>
               </div>
 
-              <Select
-                label="Categoria"
-                options={categoryOptions}
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                required
-              />
+              <div>
+                <Select
+                  label="Categoria"
+                  options={categoryOptions}
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  required
+                />
+              </div>
 
-              <div className="pt-4 space-y-3">
+              <div className="pt-2 space-y-3">
                 <Button type="submit" fullWidth size="lg">
                   {editingRule ? 'Salvar alterações' : 'Adicionar regra'}
                 </Button>

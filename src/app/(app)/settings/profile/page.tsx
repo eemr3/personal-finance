@@ -2,10 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
-import { Card } from '@/components/Card';
-import { Input } from '@/components/Input';
-import { Button } from '@/components/Button';
-import { ArrowLeft, User, Camera } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../../../lib/format';
@@ -56,11 +53,11 @@ function ProfilePage() {
         </div>
       </div>
 
-      <div className="px-6 space-y-6">
+      <div className="px-6 pt-2 pb-24 bg-linear-to-b from-primary/5 via-background to-background min-h-[50vh]">
         {/* Profile Picture */}
-        <div className="flex justify-center">
+        <div className="flex justify-center mb-10">
           <div className="relative">
-            <div className="w-24 h-24 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-primary-foreground">
+            <div className="w-24 h-24 bg-linear-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-primary-foreground shadow-lg transition-shadow duration-200">
               {user?.photoURL ? (
                 <Image
                   src={user?.photoURL}
@@ -73,76 +70,70 @@ function ProfilePage() {
                 <User size={40} />
               )}
             </div>
-            {/* <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg hover:shadow-xl transition-shadow">
-              <Camera size={16} />
-            </button> */}
           </div>
         </div>
 
-        {/* Personal Information */}
-        <Card>
-          <h3 className="mb-4">{t('settings.profile.personalInformation')}</h3>
-          <div className="space-y-5">
-            <ProfileField
-              label={t('settings.profile.email')}
-              value={user?.email ?? ''}
-            />
-            <ProfileField
-              label={t('settings.profile.provider')}
-              value={
-                user?.providerData[0]?.providerId === 'google.com'
-                  ? t('settings.profile.providerName')
-                  : ''
-              }
-            />
-            <ProfileField
-              label={t('settings.profile.fullName')}
-              value={user?.displayName ?? ''}
-            />
-          </div>
-        </Card>
-
-        {/* Account Information */}
-        <Card>
-          <h3 className="mb-4">{t('settings.profile.accountInformation')}</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center py-2">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.profile.memberSince')}
-                </p>
-                <p className="font-medium">
-                  {formatDate(
-                    user?.metadata?.creationTime ?? new Date(),
-                    'dmy',
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="h-px bg-border"></div>
-            <div className="flex justify-between items-center py-2">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {t('settings.profile.accountId')}
-                </p>
-                <p className="font-medium font-mono text-sm">
-                  {user?.uid ?? ''}
-                </p>
-              </div>
+        <section className="mb-10">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+            {t('settings.profile.personalInformation')}
+          </h2>
+          <div className="rounded-xl border border-border bg-card p-5 transition-colors duration-200">
+            <div className="space-y-5">
+              <ProfileField
+                label={t('settings.profile.email')}
+                value={user?.email ?? ''}
+              />
+              <ProfileField
+                label={t('settings.profile.provider')}
+                value={
+                  user?.providerData[0]?.providerId === 'google.com'
+                    ? t('settings.profile.providerName')
+                    : ''
+                }
+              />
+              <ProfileField
+                label={t('settings.profile.fullName')}
+                value={user?.displayName ?? ''}
+              />
             </div>
           </div>
-        </Card>
+        </section>
 
-        {/* Actions */}
-        {/* <div className="space-y-3 pb-6">
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={() => router.push('/settings')}
-          >
-            {t('common.return')}
-          </Button>
-        </div> */}
+        <div className="h-px bg-border/60 mb-10" aria-hidden />
+
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+            {t('settings.profile.accountInformation')}
+          </h2>
+          <div className="rounded-xl border border-border bg-card p-5 transition-colors duration-200">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {t('settings.profile.memberSince')}
+                  </p>
+                  <p className="font-medium">
+                    {formatDate(
+                      user?.metadata?.creationTime ?? new Date(),
+                      'dmy',
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="h-px bg-border/60" aria-hidden />
+              <div className="flex justify-between items-center py-2">
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">
+                    {t('settings.profile.accountId')}
+                  </p>
+                  <p className="font-medium font-mono text-sm truncate">
+                    {user?.uid ?? ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <BottomNav />

@@ -33,7 +33,7 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-b from-primary/5 via-background to-background flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -41,7 +41,7 @@ function LoginPageContent() {
         className="w-full max-w-md"
       >
         {/* Card principal */}
-        <div className="bg-card text-card-foreground rounded-3xl shadow-xl p-8 md:p-12 border border-border">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 md:p-12 border border-border transition-shadow duration-200">
           {/* Logo/Ícone */}
           <motion.div
             initial={{ scale: 0.8 }}

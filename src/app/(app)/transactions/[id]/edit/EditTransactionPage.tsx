@@ -33,7 +33,7 @@ interface EditTransactionPageProps {
 
 export function EditTransactionPage({ id }: EditTransactionPageProps) {
   const router = useRouter();
-  const { currencySymbol } = useFormatCurrency();
+  const { currencyInputConfig } = useFormatCurrency();
   const { transactions, editTransaction, removeTransaction } = useTransactions();
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>(
     'expense',
@@ -112,14 +112,14 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
           <div className="w-10" />
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setTransactionType('expense')}
-            className={`flex-1 py-3 rounded-xl transition-all ${
+            className={`flex-1 py-3 rounded-xl border transition-all duration-200 ease-out ${
               transactionType === 'expense'
-                ? 'bg-danger text-danger-foreground shadow-md'
-                : 'bg-card text-foreground hover:bg-muted'
+                ? 'bg-danger text-danger-foreground border-danger shadow-sm'
+                : 'bg-card border-border text-foreground hover:bg-accent/80'
             }`}
           >
             Despesa
@@ -127,10 +127,10 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
           <button
             type="button"
             onClick={() => setTransactionType('income')}
-            className={`flex-1 py-3 rounded-xl transition-all ${
+            className={`flex-1 py-3 rounded-xl border transition-all duration-200 ease-out ${
               transactionType === 'income'
-                ? 'bg-success text-success-foreground shadow-md'
-                : 'bg-card text-foreground hover:bg-muted'
+                ? 'bg-success text-success-foreground border-success shadow-sm'
+                : 'bg-card border-border text-foreground hover:bg-accent/80'
             }`}
           >
             Receita
@@ -138,23 +138,37 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 space-y-5">
-        <Input
-          label="Nome da Transação"
-          placeholder="e.g., Compras de Supermercado"
-          value={formData.name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
-          required
-        />
+      <form
+        onSubmit={handleSubmit}
+        className="px-6 pt-2 pb-24 space-y-6 bg-linear-to-b from-primary/5 via-background to-background"
+      >
+        <div>
+          <Input
+            label="Nome da Transação"
+            placeholder="e.g., Compras de Supermercado"
+            value={formData.name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+            required
+          />
+        </div>
 
         <div>
-          <label className="text-sm text-foreground mb-2 block">Valor</label>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
+            Valor
+          </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-              {currencySymbol}
-            </span>
+            {currencyInputConfig.prefix ? (
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                {currencyInputConfig.prefix}
+              </span>
+            ) : null}
+            {currencyInputConfig.suffix ? (
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                {currencyInputConfig.suffix}
+              </span>
+            ) : null}
             <input
               type="number"
               step="0.01"
@@ -163,42 +177,52 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className="w-full pl-10 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all text-2xl"
+              className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-2xl ${
+                currencyInputConfig.position === 'prefix'
+                  ? 'pl-10 pr-4'
+                  : 'pl-4 pr-10'
+              }`}
               required
             />
           </div>
         </div>
 
-        <Select
-          label="Categoria"
-          options={categories}
-          value={formData.category}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData({ ...formData, category: e.target.value })
-          }
-          required
-        />
+        <div>
+          <Select
+            label="Categoria"
+            options={categories}
+            value={formData.category}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setFormData({ ...formData, category: e.target.value })
+            }
+            required
+          />
+        </div>
 
-        <Input
-          type="date"
-          label="Data"
-          value={formData.date}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, date: e.target.value })
-          }
-          required
-        />
+        <div>
+          <Input
+            type="date"
+            label="Data"
+            value={formData.date}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+            required
+          />
+        </div>
 
-        <TextArea
-          label="Observações (Opcional)"
-          placeholder="Adicione qualquer detalhe adicional..."
-          value={formData.notes}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setFormData({ ...formData, notes: e.target.value })
-          }
-        />
+        <div>
+          <TextArea
+            label="Observações (Opcional)"
+            placeholder="Adicione qualquer detalhe adicional..."
+            value={formData.notes}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setFormData({ ...formData, notes: e.target.value })
+            }
+          />
+        </div>
 
-        <div className="pt-4 space-y-3">
+        <div className="pt-2 space-y-3">
           <Button type="submit" fullWidth size="lg">
             Salvar alterações
           </Button>

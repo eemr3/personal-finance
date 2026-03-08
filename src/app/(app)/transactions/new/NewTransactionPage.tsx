@@ -1,25 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/Button';
-import { Input, TextArea, Select } from '@/components/Input';
-import { ArrowLeft } from 'lucide-react';
-import { createTransaction } from '@/services/transactions/transactions.service';
-import { useTransactions } from '../../../../features/transactions/hooks/useTransactions';
+import { Input, Select, TextArea } from '@/components/Input';
 import { usePeriod } from '@/contexts/PeriodContext';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { getPeriodRange } from '@/lib/period';
+import { ArrowLeft } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useTransactions } from '../../../../features/transactions/hooks/useTransactions';
+import { useTranslation } from 'react-i18next';
 
 export function NewTransactionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeParam = searchParams.get('type');
+  const { t } = useTranslation();
   const initialType: 'income' | 'expense' =
     typeParam === 'income' ? 'income' : 'expense';
   const { addTransaction } = useTransactions();
   const { period } = usePeriod();
-  const { currencySymbol } = useFormatCurrency();
+  const { currencyInputConfig } = useFormatCurrency();
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>(
     initialType,
   );
@@ -37,23 +38,23 @@ export function NewTransactionPage() {
   }, [period.month, period.year]);
 
   const incomeCategories = [
-    { value: 'salary', label: 'Salary' },
-    { value: 'freelance', label: 'Freelance' },
-    { value: 'investment', label: 'Investment' },
-    { value: 'business', label: 'Business' },
-    { value: 'other', label: 'Other Income' },
+    { value: 'salary', label: t('transactions.salary') },
+    { value: 'freelance', label: t('transactions.freelance') },
+    { value: 'investment', label: t('transactions.investment') },
+    { value: 'business', label: t('transactions.business') },
+    { value: 'other', label: t('transactions.otherIncome') },
   ];
 
   const expenseCategories = [
-    { value: 'cartão_de_crédito', label: 'Cartão de Crédito' },
-    { value: 'supermercado', label: 'Supermercado' },
-    { value: 'alimentacao', label: 'Alimentação' },
-    { value: 'informática', label: 'Informática' },
-    { value: 'transporte', label: 'Transporte' },
-    { value: 'saúde', label: 'Saúde' },
-    { value: 'educação', label: 'Educação' },
-    { value: 'entretenimento', label: 'Entretenimento' },
-    { value: 'outros', label: 'Outros' },
+    { value: 'cartão_de_crédito', label: t('transactions.creditCard') },
+    { value: 'supermercado', label: t('transactions.supermarket') },
+    { value: 'alimentacao', label: t('transactions.food') },
+    { value: 'informática', label: t('transactions.computer') },
+    { value: 'transporte', label: t('transactions.transport') },
+    { value: 'saúde', label: t('transactions.health') },
+    { value: 'educação', label: t('transactions.education') },
+    { value: 'entretenimento', label: t('transactions.entertainment') },
+    { value: 'outros', label: t('transactions.other') },
   ];
 
   const categories =
@@ -81,50 +82,70 @@ export function NewTransactionPage() {
           >
             <ArrowLeft size={24} />
           </button>
-          <h1>Nova Transação</h1>
+          <h1>{t('transactions.newTransaction')}</h1>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setTransactionType('expense')}
-            className={`flex-1 py-3 rounded-xl transition-all ${
+            className={`flex-1 py-3 rounded-xl border transition-all duration-200 ease-out ${
               transactionType === 'expense'
-                ? 'bg-danger text-danger-foreground shadow-md'
-                : 'bg-card text-foreground hover:bg-muted'
+                ? 'bg-danger text-danger-foreground border-danger shadow-sm'
+                : 'bg-card border-border text-foreground hover:bg-accent/80'
             }`}
           >
-            Despesa
+            {t('transactions.expense')}
           </button>
           <button
+            type="button"
             onClick={() => setTransactionType('income')}
-            className={`flex-1 py-3 rounded-xl transition-all ${
+            className={`flex-1 py-3 rounded-xl border transition-all duration-200 ease-out ${
               transactionType === 'income'
-                ? 'bg-success text-success-foreground shadow-md'
-                : 'bg-card text-foreground hover:bg-muted'
+                ? 'bg-success text-success-foreground border-success shadow-sm'
+                : 'bg-card border-border text-foreground hover:bg-accent/80'
             }`}
           >
-            Receita
+            {t('transactions.income')}
           </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 space-y-5">
-        <Input
-          label="Nome da Transação"
-          placeholder="e.g., Compras de Supermercado"
+      <form
+        onSubmit={handleSubmit}
+        className="px-6 pt-2 pb-24 space-y-6 bg-linear-to-b from-primary/5 via-background to-background"
+      >
+        <div>
+          <Input
+            label={t('transactions.name')}
+          placeholder={
+            transactionType === 'expense'
+              ? `${t('transactions.namePlaceholderExpense')}`
+              : `${t('transactions.namePlaceholderIncome')}`
+          }
           value={formData.name}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setFormData({ ...formData, name: e.target.value })
           }
-          required
-        />
+            required
+          />
+        </div>
 
         <div>
-          <label className="text-sm text-foreground mb-2 block">Valor</label>
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
+            {t('transactions.amount')}
+          </label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
-              {currencySymbol}
-            </span>
+            {currencyInputConfig.prefix ? (
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                {currencyInputConfig.prefix}
+              </span>
+            ) : null}
+            {currencyInputConfig.suffix ? (
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-muted-foreground">
+                {currencyInputConfig.suffix}
+              </span>
+            ) : null}
             <input
               type="number"
               step="0.01"
@@ -133,44 +154,58 @@ export function NewTransactionPage() {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className="w-full pl-10 ml-2 pr-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all text-2xl"
+              className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-2xl ${
+                currencyInputConfig.position === 'prefix'
+                  ? 'pl-10 pr-4'
+                  : 'pl-4 pr-10'
+              }`}
               required
             />
           </div>
         </div>
 
-        <Select
-          label="Categoria"
+        <div>
+          <Select
+            label={t('transactions.category')}
           options={categories}
           value={formData.category}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             setFormData({ ...formData, category: e.target.value })
           }
-          required
-        />
+            required
+          />
+        </div>
 
-        <Input
-          type="date"
-          label="Data"
+        <div>
+          <Input
+            type="date"
+            label={t('transactions.date')}
           value={formData.date}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
             setFormData({ ...formData, date: e.target.value })
           }
-          required
-        />
+            required
+          />
+        </div>
 
-        <TextArea
-          label="Observações (Opcional)"
-          placeholder="Adicione qualquer detalhe adicional..."
-          value={formData.notes}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setFormData({ ...formData, notes: e.target.value })
+        <div>
+          <TextArea
+            label={t('transactions.notes')}
+          placeholder={
+            transactionType === 'expense'
+              ? `${t('transactions.notesPlaceholderExpense')}`
+              : `${t('transactions.notesPlaceholderIncome')}`
           }
-        />
+          value={formData.notes}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setFormData({ ...formData, notes: e.target.value })
+            }
+          />
+        </div>
 
-        <div className="pt-4 space-y-3">
+        <div className="pt-2 space-y-3">
           <Button type="submit" fullWidth size="lg">
-            Salvar Transação
+            {t('common.save')}
           </Button>
           <Button
             type="button"
@@ -178,7 +213,7 @@ export function NewTransactionPage() {
             fullWidth
             onClick={() => router.back()}
           >
-            Cancelar
+            {t('common.cancel')}
           </Button>
         </div>
       </form>

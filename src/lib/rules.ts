@@ -1,6 +1,7 @@
 import type { FixedExpenseRule, Transaction } from '@/types/transactions';
 import type { Period } from '@/lib/period';
 import { getPeriodRange } from '@/lib/period';
+import { stripCurrencyFromAmount } from '@/lib/format';
 
 /**
  * Extrai o valor mínimo de receita da condição (ex.: "Se receita > R$ 3.776,05" -> 3776.05).
@@ -39,7 +40,7 @@ function calculateRuleAmount(
 ): number {
   const trimmed = amountStr.trim();
   const numericValue =
-    parseFloat(trimmed.replace('%', '').replace(/[R$\s]/g, '').replace(',', '.')) || 0;
+    parseFloat(stripCurrencyFromAmount(trimmed)) || 0;
 
   const isPercentage =
     amountType === 'percentage' || trimmed.endsWith('%');

@@ -68,23 +68,36 @@ function TransactionsPage() {
         />
       </div>
 
-      <div className="px-6 pt-4">
-        <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="px-6 pt-2 pb-24 bg-linear-to-b from-primary/5 via-background to-background min-h-[50vh]">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           <MonthSelector />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-card rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Total receitas</p>
-            <p className="text-xl text-success">{formatCurrency(totalIncome)}</p>
+        <section className="mb-6">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+            Resumo
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-all duration-200">
+              <p className="text-sm text-muted-foreground mb-1">
+                Total receitas
+              </p>
+              <p className="text-xl font-medium text-success">
+                {formatCurrency(totalIncome)}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-all duration-200">
+              <p className="text-sm text-muted-foreground mb-1">
+                Total despesas
+              </p>
+              <p className="text-xl font-medium text-danger">
+                {formatCurrency(totalExpenses)}
+              </p>
+            </div>
           </div>
-          <div className="bg-card rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Total despesas</p>
-            <p className="text-xl text-danger">{formatCurrency(totalExpenses)}</p>
-          </div>
-        </div>
+        </section>
 
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             size={20}
@@ -94,27 +107,26 @@ function TransactionsPage() {
             placeholder="Search transactions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
           />
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-6">
           {FILTER_OPTIONS.map(({ value, label }) => {
             const isActive = filterType === value;
-            const activeClass =
-              value === 'all'
-                ? 'bg-primary text-primary-foreground'
-                : value === 'income'
-                  ? 'bg-success text-success-foreground'
-                  : 'bg-danger text-danger-foreground';
             return (
               <button
                 key={value}
+                type="button"
                 onClick={() => setFilterType(value)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ease-out ${
                   isActive
-                    ? activeClass
-                    : 'bg-card text-foreground hover:bg-muted'
+                    ? value === 'all'
+                      ? 'bg-primary/10 border-primary/40 text-foreground font-medium'
+                      : value === 'income'
+                        ? 'bg-success/10 border-success/40 text-success font-medium'
+                        : 'bg-danger/10 border-danger/40 text-danger font-medium'
+                    : 'bg-card border-border text-muted-foreground hover:bg-accent/80'
                 }`}
               >
                 {label}
@@ -122,9 +134,12 @@ function TransactionsPage() {
             );
           })}
         </div>
-      </div>
 
-      <div className="px-6 space-y-3">
+        <section>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+            Transações
+          </h2>
+          <div className="space-y-2">
         {filteredTransactions.length > 0 ? (
           filteredTransactions.map((transaction) => {
             const isManual = transaction.source !== 'rule';
@@ -150,10 +165,12 @@ function TransactionsPage() {
             );
           })
         ) : (
-          <div className="text-center py-12">
+          <div className="rounded-xl border border-border border-dashed bg-card/50 px-6 py-12 text-center">
             <p className="text-muted-foreground">Não há transações</p>
           </div>
         )}
+          </div>
+        </section>
       </div>
 
       <FloatingActionButton onClick={() => router.push('/transactions/new')} />

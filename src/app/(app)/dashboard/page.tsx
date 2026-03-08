@@ -157,20 +157,18 @@ function DashboardPage() {
         />
       </div>
 
-      <div className="px-6 pt-4">
-        {/* Barra de mês: apenas desktop. No mobile usa o pill abaixo. */}
+      <div className="px-6 pt-2 pb-6 bg-linear-to-b from-primary/5 via-background to-background">
         <div className="hidden md:block mb-4">
           <PeriodSelector />
         </div>
 
-        {/* No mobile: pill de mês no lugar dos dois botões. No desktop: dois botões. */}
         <div className="flex gap-3 mb-6 relative z-10">
           <div className="md:hidden flex items-center min-h-[44px]">
             <MonthSelector />
           </div>
-          <div className="hidden md:flex flex-1 gap-3">
+          <div className="hidden md:flex flex-1 gap-2">
             <Button
-              className="flex-1 py-4 bg-success text-success-foreground"
+              className="flex-1 py-4 bg-success text-success-foreground border border-success transition-all duration-200"
               onClick={() => router.push('/transactions/new?type=income')}
             >
               <Plus size={20} className="mr-2" />
@@ -178,7 +176,7 @@ function DashboardPage() {
             </Button>
             <Button
               variant="outline"
-              className="flex-1 py-4 border-2"
+              className="flex-1 py-4 border-2 transition-all duration-200 hover:bg-accent/80"
               onClick={() => router.push('/transactions/new?type=expense')}
             >
               <Plus size={20} className="mr-2" />
@@ -187,33 +185,40 @@ function DashboardPage() {
           </div>
         </div>
 
-        <div className="mb-6 relative z-0">
-          <p className="text-muted-foreground mb-1">Saldo total</p>
-          <h1 className="text-4xl break-keep tabular-nums">
+        <section className="mb-6 relative z-0">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+            Saldo total
+          </h2>
+          <p className="text-4xl font-semibold break-keep tabular-nums">
             {formatCurrency(totalIncome - totalExpenses)}
-          </h1>
-        </div>
+          </p>
+        </section>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FinanceSummaryCard
-            title="Receitas"
-            amount={totalIncome}
-            icon={<TrendingUp className="text-success" size={24} />}
-            variant="income"
-            subtitle="Este mês"
-          />
-          <FinanceSummaryCard
-            title="Despesas"
-            amount={totalExpenses}
-            icon={<TrendingDown className="text-danger" size={24} />}
-            variant="expense"
-            subtitle="Este mês"
-          />
-        </div>
+        <section className="mb-6">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
+            Este mês
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            <FinanceSummaryCard
+              title="Receitas"
+              amount={totalIncome}
+              icon={<TrendingUp className="text-success" size={24} />}
+              variant="income"
+              subtitle="Este mês"
+            />
+            <FinanceSummaryCard
+              title="Despesas"
+              amount={totalExpenses}
+              icon={<TrendingDown className="text-danger" size={24} />}
+              variant="expense"
+              subtitle="Este mês"
+            />
+          </div>
+        </section>
       </div>
 
-      <div className="px-6 space-y-6">
-        <Card>
+      <div className="px-6 pt-2 pb-24 space-y-6">
+        <Card className="border border-border rounded-xl transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <CardTitle>Receitas e despesas mensais</CardTitle>
           </CardHeader>
@@ -282,7 +287,7 @@ function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-border rounded-xl transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <CardTitle>Gastos por categoria</CardTitle>
           </CardHeader>
@@ -328,18 +333,21 @@ function DashboardPage() {
           </CardContent>
         </Card>
 
-        <div>
+        <section>
           <div className="flex items-center justify-between mb-4">
-            <h3>Transações recentes</h3>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Transações recentes
+            </h2>
             <Button
               variant="ghost"
               size="sm"
+              className="transition-colors duration-200"
               onClick={() => router.push('/transactions')}
             >
               Ver todas
             </Button>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {recentTransactions.length === 0 && !transactionsLoading ? (
               <p className="text-sm text-muted-foreground">
                 Nenhuma transação recente.
@@ -356,7 +364,7 @@ function DashboardPage() {
               ))
             )}
           </div>
-        </div>
+        </section>
       </div>
 
       <FloatingActionButton onClick={() => router.push('/transactions/new')} />

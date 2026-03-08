@@ -33,7 +33,7 @@ export function FinanceSummaryCard({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="border border-border rounded-xl hover:shadow-md hover:bg-accent/30 transition-all duration-200">
       <CardContent>
         <div className="flex items-start justify-between mb-3">
           <div
