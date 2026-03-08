@@ -6,7 +6,9 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from 'react';
+import { getDetectedPreferences } from '@/lib/detect-locale';
 
 const STORAGE_KEY = 'personal-finance-appearance';
 
@@ -68,13 +70,40 @@ export function AppearanceProvider({
     typeof window !== 'undefined' ? loadFromStorage() : defaultState,
   );
   const [mounted, setMounted] = useState(false);
+  const initialSaveSkipped = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // No cliente, após mount: garante estado a partir do storage ou detecção (hidratação + primeira vez)
   useEffect(() => {
-    if (mounted) saveToStorage(state);
+    if (!mounted || typeof window === 'undefined') return;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const next = raw
+      ? (() => {
+          try {
+            const parsed = JSON.parse(raw) as Partial<AppearanceState>;
+            return {
+              currency: parsed.currency ?? defaultState.currency,
+              dateFormat: parsed.dateFormat ?? defaultState.dateFormat,
+              language: parsed.language ?? defaultState.language,
+            };
+          } catch {
+            return getDetectedPreferences();
+          }
+        })()
+      : getDetectedPreferences();
+    setState(next);
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (!initialSaveSkipped.current) {
+      initialSaveSkipped.current = true;
+      return;
+    }
+    saveToStorage(state);
   }, [mounted, state]);
 
   const setCurrency = useCallback((currency: AppearanceCurrency) => {
