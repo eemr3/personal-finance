@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult, User, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase-client';
-import { useRouter } from 'next/navigation';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Firebase user:', firebaseUser);
       setUser(firebaseUser);
       setLoading(false);
     });
@@ -20,12 +20,30 @@ export function useAuth() {
 
   async function logout() {
     await signOut(auth);
-    router.push('/login');
   }
+  // useEffect(() => {
+  //   async function initAuth() {
+  //     try {
+  //       const result = await getRedirectResult(auth);
 
-  return {
-    user,
-    loading,
-    logout,
-  };
+  //       if (result?.user) {
+  //         console.log('Redirect login success:', result.user);
+  //       }
+  //     } catch (error) {
+  //       console.error('Redirect error:', error);
+  //     }
+
+  //     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+  //       console.log('Firebase user:', firebaseUser);
+  //       setUser(firebaseUser);
+  //       setLoading(false);
+  //     });
+
+  //     return unsubscribe;
+  //   }
+
+  //   initAuth();
+  // }, []);
+
+  return { user, loading, logout };
 }
