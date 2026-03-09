@@ -1,14 +1,19 @@
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  signOut,
+} from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase-client';
 
-const provider = new GoogleAuthProvider();
-
 export async function signInWithGoogle() {
-  const result = await signInWithPopup(auth, provider);
+  const provider = new GoogleAuthProvider();
 
-  return {
-    user: result.user,
-  };
+  if (window.location.hostname === 'localhost') {
+    await signInWithPopup(auth, provider);
+  } else {
+    await signInWithRedirect(auth, provider);
+  }
 }
 
 export async function logout() {

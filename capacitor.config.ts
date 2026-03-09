@@ -4,7 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.finwise.app',
   appName: 'FinWise',
   server: {
-    url: 'https://seuapp.com',
+    url: 'https://finwise-io.vercel.app',
     cleartext: true,
   },
 };
