@@ -8,6 +8,7 @@ import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useTransactions } from '@/features/transactions/hooks/useTransactions';
 import { getCategoryLabel } from '@/lib/categories';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/categories';
+import { PAYMENT_METHOD_KEYS } from '@/lib/payment-methods';
 import type { CategoryOption } from '@/types/categories';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
     name: '',
     amount: '',
     category: '',
+    paymentMethod: '',
     date: '',
     notes: '',
   });
@@ -42,6 +44,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
         name: transaction.name || '',
         amount: String(transaction.amount ?? ''),
         category: transaction.category || '',
+        paymentMethod: (transaction as { paymentMethod?: string }).paymentMethod || '',
         date:
           typeof transaction.date === 'string'
             ? transaction.date
@@ -208,6 +211,25 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
             required
           />
         </div>
+
+        {transactionType === 'expense' && (
+          <div>
+            <Select
+              label={t('transactions.paymentMethod')}
+              options={[
+                { value: '', label: t('transactions.paymentMethodPlaceholder') },
+                ...PAYMENT_METHOD_KEYS.map((key) => ({
+                  value: key,
+                  label: t(`transactions.paymentMethods.${key}`),
+                })),
+              ]}
+              value={formData.paymentMethod}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setFormData({ ...formData, paymentMethod: e.target.value })
+              }
+            />
+          </div>
+        )}
 
         <div>
           <Input

@@ -13,8 +13,15 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Here's your financial overview",
-    "hello": "Hello",
-    "financialOverview": "Here's your financial overview"
+    "goodMorning": "Good morning",
+    "totalBalance": "Total balance",
+    "income": "Income",
+    "expense": "Expense",
+    "receive": "Receive",
+    "send": "Send",
+    "recent": "Recent",
+    "viewAll": "View all",
+    "noRecentTransactions": "No recent transactions"
   },
   "header": {
     "openMenu": "Open menu",
@@ -24,6 +31,9 @@
     "return": "Go back"
   },
   "transactions": {
+    "completeHistory": "Your complete financial history",
+    "searchPlaceholder": "Search transactions...",
+    "all": "All",
     "categoriesExpense": {
       "credit_card": "Credit Card",
       "supermarket": "Supermarket",
@@ -54,8 +64,8 @@
       "savings": "Savings",
       "other": "Other"
     },
-    "title": "Transacciones",
-    "subtitle": "Controla tus ingresos y gastos",
+    "title": "Transactions",
+    "subtitle": "Track your income and expenses",
     "newTransaction": "Nueva transacción",
     "income": "Ingreso",
     "expense": "Gasto",
@@ -72,10 +82,28 @@
     "noTransactionsFound": "No se encontraron transacciones",
     "deleteTransactionConfirm": "¿Eliminar esta transacción?",
     "delete": "Eliminar",
-    "edit": "Editar"
+    "edit": "Editar",
+    "paymentMethod": "Payment method",
+    "paymentMethodPlaceholder": "Select payment method",
+    "paymentMethods": {
+      "credit_personal": "Personal credit card",
+      "credit_business": "Business credit card",
+      "pix": "Pix",
+      "cash": "Cash"
+    }
   },
   "settings": {
     "subtitle": "Manage your app preferences",
+    "preferences": "Preferences",
+    "currency": "Currency",
+    "language": "Language",
+    "theme": "Theme",
+    "automationsAndRules": "Automations & rules",
+    "addNew": "Add new",
+    "securityAndPrivacy": "Security & privacy",
+    "noActiveRules": "No active automation rules.",
+    "deleteRuleConfirm": "Delete this rule?",
+    "comingSoon": "Coming soon",
     "fixedExpenseRules": {
       "description": "Configure fixed expense rules",
       "rule": "rule"
@@ -116,6 +144,18 @@
       "providerName": "Google"
     }
   },
+  "cards": {
+    "title": "Cards",
+    "subtitle": "Monthly spending summary by card",
+    "allCards": "All cards",
+    "recentActivity": "Recent activity",
+    "creditPersonal": "Personal card",
+    "creditBusiness": "Business card",
+    "totalMonth": "Total this month",
+    "ofIncome": "of income",
+    "noCardExpenses": "No card expenses this month",
+    "transactionsCount": "{{count}} transactions"
+  },
   "fixedExpenses": {
     "rules": {
       "title": "Fixed expenses",
@@ -141,7 +181,8 @@
       "fixedAmount": "Fixed amount",
       "percentageAmount": "Percentage",
       "saveChanges": "Save changes",
-      "category": "Category"
+      "category": "Category",
+      "paymentMethod": "Payment method"
     },
     "conditionIncomeAboveContains": "income",
     "conditionDayOfMonthContains": "day"
@@ -149,6 +190,7 @@
   "bottomNav": {
     "home": "Home",
     "transactions": "Transactions",
+    "cards": "Cards",
     "settings": "Settings"
   },
   "monthSelector": {

@@ -1,4 +1,5 @@
 import { AuthGuard } from '@/features/auth/components/AuthGuard';
+import { MobileLayout } from '@/components/layout/MobileLayout';
 
 export default function AppLayout({
   children,
@@ -7,11 +8,7 @@ export default function AppLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto min-h-screen w-full">
-          {children}
-        </div>
-      </div>
+      <MobileLayout>{children}</MobileLayout>
     </AuthGuard>
   );
 }

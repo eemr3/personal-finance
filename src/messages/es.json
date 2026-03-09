@@ -14,8 +14,15 @@
   "dashboard": {
     "title": "Panel",
     "subtitle": "Aquí está tu resumen financiero",
-    "hello": "Hola",
-    "financialOverview": "Aquí está tu resumen financiero"
+    "goodMorning": "Buenos días",
+    "totalBalance": "Saldo total",
+    "income": "Ingresos",
+    "expense": "Gastos",
+    "receive": "Recibir",
+    "send": "Enviar",
+    "recent": "Recientes",
+    "viewAll": "Ver todas",
+    "noRecentTransactions": "Sin transacciones recientes"
   },
   "header": {
     "openMenu": "Abrir menú",
@@ -24,6 +31,9 @@
     "logout": "Cerrar sesión"
   },
   "transactions": {
+    "completeHistory": "Tu historial financiero completo",
+    "searchPlaceholder": "Buscar transacciones...",
+    "all": "Todas",
     "categoriesExpense": {
       "credit_card": "Tarjeta de crédito",
       "supermarket": "Supermercado",
@@ -54,7 +64,7 @@
       "savings": "Ahorros",
       "other": "Otros"
     },
-    "title": "Transactions",
+    "title": "Transacciones",
     "subtitle": "Track your income and expenses",
     "newTransaction": "New transaction",
     "income": "Income",
@@ -72,10 +82,28 @@
     "noTransactionsFound": "No transactions found",
     "deleteTransactionConfirm": "Delete this transaction?",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "paymentMethod": "Forma de pago",
+    "paymentMethodPlaceholder": "Selecciona la forma de pago",
+    "paymentMethods": {
+      "credit_personal": "Tarjeta de crédito personal",
+      "credit_business": "Tarjeta de crédito empresarial",
+      "pix": "Pix",
+      "cash": "Efectivo"
+    }
   },
   "settings": {
     "subtitle": "Gestiona las preferencias de la app",
+    "preferences": "Preferencias",
+    "currency": "Moneda",
+    "language": "Idioma",
+    "theme": "Tema",
+    "automationsAndRules": "Automatizaciones y reglas",
+    "addNew": "Añadir",
+    "securityAndPrivacy": "Seguridad y privacidad",
+    "noActiveRules": "Sin reglas de automatización activas.",
+    "deleteRuleConfirm": "¿Eliminar esta regla?",
+    "comingSoon": "Próximamente",
     "fixedExpenseRules": {
       "description": "Configura reglas de gastos fijos",
       "rule": "regla"
@@ -116,6 +144,18 @@
       "providerName": "Google"
     }
   },
+  "cards": {
+    "title": "Tarjetas",
+    "subtitle": "Resumen mensual de gastos por tarjeta",
+    "allCards": "Todas las tarjetas",
+    "recentActivity": "Actividad reciente",
+    "creditPersonal": "Tarjeta personal",
+    "creditBusiness": "Tarjeta empresarial",
+    "totalMonth": "Total del mes",
+    "ofIncome": "del ingreso",
+    "noCardExpenses": "Sin gastos con tarjeta este mes",
+    "transactionsCount": "{{count}} transacciones"
+  },
   "fixedExpenses": {
     "rules": {
       "title": "Gastos fijos",
@@ -141,7 +181,8 @@
       "fixedAmount": "Valor fijo",
       "percentageAmount": "Porcentaje",
       "saveChanges": "Guardar cambios",
-      "category": "Categoría"
+      "category": "Categoría",
+      "paymentMethod": "Forma de pago"
     },
     "conditionIncomeAboveContains": "ingreso",
     "conditionDayOfMonthContains": "día"
@@ -149,6 +190,7 @@
   "bottomNav": {
     "home": "Inicio",
     "transactions": "Transacciones",
+    "cards": "Tarjetas",
     "settings": "Configuración"
   },
   "monthSelector": {

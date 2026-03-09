@@ -9,7 +9,7 @@ import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRule
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { stripCurrencyFromAmount } from '@/lib/format';
 import { FIXED_EXPENSE_CATEGORIES } from '@/lib/categories';
-import { BottomNav } from '../../../../components/BottomNav';
+import { PAYMENT_METHOD_KEYS } from '@/lib/payment-methods';
 import { useTranslation } from 'react-i18next';
 
 type ConditionType =
@@ -216,6 +216,7 @@ interface Rule {
   amount: string;
   amountType?: 'fixed' | 'percentage';
   category: string;
+  paymentMethod?: string;
 }
 
 function FixedExpensesPage() {
@@ -236,6 +237,7 @@ function FixedExpensesPage() {
     amountType: 'fixed',
     amount: '',
     category: '',
+    paymentMethod: '',
   });
 
   const categoryOptions = FIXED_EXPENSE_CATEGORIES.map((key) => ({
@@ -281,6 +283,7 @@ function FixedExpensesPage() {
       amountType: 'fixed',
       amount: '',
       category: categoryOptions[0].value,
+      paymentMethod: '',
     });
     setShowModal(true);
   };
@@ -305,6 +308,7 @@ function FixedExpensesPage() {
       amountType: isPercentage ? 'percentage' : 'fixed',
       amount: stripCurrencyFromAmount(rule.amount),
       category: categoryValue,
+      paymentMethod: rule.paymentMethod ?? '',
     });
     setShowModal(true);
   };
@@ -324,13 +328,16 @@ function FixedExpensesPage() {
       t,
     );
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: formData.name.trim(),
       condition,
       amountType: formData.amountType,
       amount: formData.amount.trim(),
       category: (formData.category || categoryOptions[0].value).trim(),
     };
+    if (formData.paymentMethod) {
+      payload.paymentMethod = formData.paymentMethod;
+    }
     if (editingRule) {
       updateRule(editingRule.id, payload);
     } else {
@@ -383,6 +390,7 @@ function FixedExpensesPage() {
                   amount={rule.amount}
                   amountType={rule.amountType}
                   category={rule.category ?? ''}
+                  paymentMethod={rule.paymentMethod}
                   formatCurrency={formatCurrency}
                   onEdit={() => handleEditRule(rule)}
                   onDelete={() => handleDeleteRule(rule.id)}
@@ -620,6 +628,23 @@ function FixedExpensesPage() {
                 />
               </div>
 
+              <div>
+                <Select
+                  label={t('fixedExpenses.rules.paymentMethod')}
+                  options={[
+                    { value: '', label: t('transactions.paymentMethodPlaceholder') },
+                    ...PAYMENT_METHOD_KEYS.map((key) => ({
+                      value: key,
+                      label: t(`transactions.paymentMethods.${key}`),
+                    })),
+                  ]}
+                  value={formData.paymentMethod}
+                  onChange={(e) =>
+                    setFormData({ ...formData, paymentMethod: e.target.value })
+                  }
+                />
+              </div>
+
               <div className="pt-2 space-y-3">
                 <Button type="submit" fullWidth size="lg">
                   {editingRule
@@ -639,7 +664,6 @@ function FixedExpensesPage() {
           </div>
         </div>
       )}
-      <BottomNav />
     </div>
   );
 }

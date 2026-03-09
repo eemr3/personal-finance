@@ -12,6 +12,7 @@ interface RuleCardProps {
   amount: string;
   amountType?: 'fixed' | 'percentage';
   category?: string | null;
+  paymentMethod?: string | null;
   formatCurrency?: (value: number) => string;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -23,6 +24,7 @@ export function RuleCard({
   amount,
   amountType,
   category = '',
+  paymentMethod,
   formatCurrency,
   onEdit,
   onDelete,
@@ -58,6 +60,11 @@ export function RuleCard({
             <span className="inline-block px-3 py-1.5 bg-muted text-muted-foreground rounded-lg text-sm">
               {getCategoryLabel(category ?? '', 'fixed', t)}
             </span>
+            {paymentMethod && (
+              <span className="inline-block px-3 py-1.5 bg-muted/80 text-muted-foreground rounded-lg text-sm">
+                {t(`transactions.paymentMethods.${paymentMethod}`)}
+              </span>
+            )}
           </div>
         </div>
 

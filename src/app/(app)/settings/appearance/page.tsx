@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
-import { BottomNav } from '@/components/BottomNav';
 import {
   useAppearance,
   type AppearanceCurrency,
@@ -351,8 +350,6 @@ function AppearancePage() {
           </div>
         </section>
       </div>
-
-      <BottomNav />
     </div>
   );
 }

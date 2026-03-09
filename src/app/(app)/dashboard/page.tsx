@@ -2,59 +2,14 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Bar,
-  BarChart,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { useTranslation } from 'react-i18next';
+import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { ArrowDownRight, ArrowUpRight, Bell, Plus, Wallet } from 'lucide-react';
 
-import { BottomNav } from '@/components/BottomNav';
-import { AppHeader } from '@/components/AppHeader';
-import { Button } from '@/components/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
-import { FinanceSummaryCard } from '@/components/FinanceSummaryCard';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { PeriodSelector } from '@/components/PeriodSelector';
-import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
-import { getCategoryLabel, FIXED_EXPENSE_CATEGORIES } from '@/lib/categories';
-import { Plus, TrendingDown, TrendingUp } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
-const CATEGORY_COLORS = [
-  '#10b981',
-  '#3b82f6',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#ec4899',
-  '#14b8a6',
-];
-
-const MONTH_LABELS: Record<string, string> = {
-  '01': 'Jan',
-  '02': 'Fev',
-  '03': 'Mar',
-  '04': 'Abr',
-  '05': 'Mai',
-  '06': 'Jun',
-  '07': 'Jul',
-  '08': 'Ago',
-  '09': 'Set',
-  '10': 'Out',
-  '11': 'Nov',
-  '12': 'Dez',
-};
 
 function getMonthKey(t: {
   date?: string;
@@ -79,301 +34,321 @@ function getMonthKey(t: {
 function DashboardPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { formatCurrency } = useFormatCurrency();
+  const { formatCurrency, currency } = useFormatCurrency();
+  const { user, loading } = useAuth();
   const {
     allTransactionsForDisplay,
-    allExpenses,
     totalIncome,
     totalExpenses,
     loading: transactionsLoading,
+    removeTransaction,
   } = useTransactionsWithRules();
-  const { user, loading, logout } = useAuth();
 
-  const monthlyData = useMemo(() => {
-    const byMonth: Record<string, { receitas: number; despesas: number }> = {};
-    for (const t of allExpenses) {
-      const key = getMonthKey(t);
-      if (key) {
-        if (!byMonth[key]) byMonth[key] = { receitas: 0, despesas: 0 };
-        byMonth[key].despesas += Number(t.amount ?? 0);
+  const balance = totalIncome - totalExpenses;
+  const currencyCode = (currency as string).toUpperCase();
+
+  const chartData = useMemo(() => {
+    const byDay: Record<string, number> = {};
+    let running = 0;
+    const sorted = [...allTransactionsForDisplay].sort(
+      (a, b) =>
+        new Date(
+          (a.date as string)?.includes?.('/')
+            ? (a.date as string).split('/').reverse().join('-')
+            : ((a.date as string) ?? 0),
+        ).getTime() -
+        new Date(
+          (b.date as string)?.includes?.('/')
+            ? (b.date as string).split('/').reverse().join('-')
+            : ((b.date as string) ?? 0),
+        ).getTime(),
+    );
+    for (const tx of sorted) {
+      const amt = Number((tx as { amount?: number }).amount ?? 0);
+      const type = String((tx as { type?: string }).type ?? '').toLowerCase();
+      running += type === 'income' ? amt : -amt;
+      const d = (tx as { date?: string }).date;
+      if (d) {
+        const key =
+          typeof d === 'string' && d.includes('/')
+            ? d.split('/').reverse().join('-')
+            : d;
+        byDay[key] = running;
       }
     }
-    for (const t of allTransactionsForDisplay.filter(
-      (x) => String(x.type ?? '').toLowerCase() === 'income',
-    )) {
-      const key = getMonthKey(
-        t as { date?: string; createdAt?: { toDate?: () => Date } },
-      );
-      if (key) {
-        if (!byMonth[key]) byMonth[key] = { receitas: 0, despesas: 0 };
-        byMonth[key].receitas += Number((t as { amount?: number }).amount ?? 0);
-      }
+    const keys = Object.keys(byDay).sort().slice(-7);
+    if (keys.length === 0) {
+      return [
+        { date: '1', balance: balance * 0.4 },
+        { date: '2', balance: balance * 0.6 },
+        { date: '3', balance: balance * 0.5 },
+        { date: '4', balance: balance * 0.8 },
+        { date: '5', balance: balance * 0.7 },
+        { date: '6', balance: balance * 0.9 },
+        { date: '7', balance },
+      ];
     }
-    const keys = Object.keys(byMonth).sort().slice(-6);
-    return keys.map((key) => {
-      const [, mm] = key.split('-');
-      const data = byMonth[key];
-      return {
-        month: MONTH_LABELS[mm] ?? mm,
-        receitas: data.receitas,
-        despesas: data.despesas,
-      };
-    });
-  }, [allExpenses, allTransactionsForDisplay]);
-
-  const categoryData = useMemo(() => {
-    const byCategory: Record<string, number> = {};
-    for (const t of allExpenses) {
-      const cat = t.category || 'other';
-      byCategory[cat] = (byCategory[cat] ?? 0) + Number(t.amount ?? 0);
-    }
-    const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
-    const fixedKeys = FIXED_EXPENSE_CATEGORIES as readonly string[];
-    return entries.map(([key], i) => {
-      const categoryType = fixedKeys.includes(key) ? 'fixed' : 'expense';
-      return {
-        name: getCategoryLabel(key, categoryType, t),
-        value: entries[i][1],
-        color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
-      };
-    });
-  }, [allExpenses, t]);
+    return keys.map((k) => ({
+      date: k.slice(-2),
+      balance: byDay[k] ?? balance,
+    }));
+  }, [allTransactionsForDisplay, balance]);
 
   const recentTransactions = useMemo(
-    () => allTransactionsForDisplay.slice(0, 5),
+    () =>
+      [...allTransactionsForDisplay]
+        .sort((a, b) => {
+          const da = (a as { date?: string }).date ?? '';
+          const db = (b as { date?: string }).date ?? '';
+          const parse = (d: string) => {
+            if (d.includes('/')) {
+              const [dd, mm, yyyy] = d.split('/');
+              return new Date(
+                Number(yyyy),
+                Number(mm) - 1,
+                Number(dd),
+              ).getTime();
+            }
+            return new Date(d).getTime();
+          };
+          return parse(db) - parse(da);
+        })
+        .slice(0, 5),
     [allTransactionsForDisplay],
   );
 
   if (loading) {
-    return <p>Carregando...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">{t('common.loading')}</p>
+      </div>
+    );
   }
 
   if (!user) {
-    return <p>Usuário não autenticado</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Usuário não autenticado</p>
+      </div>
+    );
   }
 
+  const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="px-4 pb-4">
-        <AppHeader
-          title={<>{t('dashboard.title')}</>}
-          subtitle={t('dashboard.subtitle')}
-        />
-      </div>
-
-      <div className="px-6 pt-2 pb-6 bg-linear-to-b from-primary/5 via-background to-background">
-        <div className="hidden md:block mb-4">
-          <PeriodSelector />
-        </div>
-
-        <div className="flex gap-3 mb-6 relative z-10">
-          <div className="md:hidden flex items-center min-h-[44px]">
-            <MonthSelector />
+    <div className="p-6 space-y-8 pb-32">
+      {/* Header */}
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-linear-to-tr from-primary/80 to-primary/20 p-[2px]">
+            <div className="w-full h-full rounded-full bg-card overflow-hidden">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={displayName}
+                  className="w-full h-full object-cover opacity-80"
+                />
+              ) : (
+                <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary-foreground font-semibold">
+                  {displayName.slice(0, 2).toUpperCase()}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="hidden md:flex flex-1 gap-2">
-            <Button
-              className="flex-1 py-4 bg-success text-success-foreground border border-success transition-all duration-200"
-              onClick={() => router.push('/transactions/new?type=income')}
-            >
-              <Plus size={20} className="mr-2" />
-              Adicionar receita
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 py-4 border-2 transition-all duration-200 hover:bg-accent/80"
-              onClick={() => router.push('/transactions/new?type=expense')}
-            >
-              <Plus size={20} className="mr-2" />
-              Adicionar despesa
-            </Button>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">
+              {t('dashboard.goodMorning')},
+            </p>
+            <h1 className="text-lg font-bold text-foreground">{displayName}</h1>
           </div>
         </div>
+        <button
+          type="button"
+          className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center relative hover:bg-secondary/80 transition-colors"
+          aria-label="Notificações"
+        >
+          <Bell className="w-5 h-5 text-foreground" />
+          <span className="absolute top-2.5 right-3 w-2 h-2 rounded-full bg-destructive" />
+        </button>
+      </header>
 
-        <section className="mb-6 relative z-0">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-            Saldo total
-          </h2>
-          <p className="text-4xl font-semibold break-keep tabular-nums">
-            {formatCurrency(totalIncome - totalExpenses)}
-          </p>
-        </section>
+      {/* Balance Card */}
+      <section className="relative">
+        <div className="absolute inset-0 bg-primary/20 blur-[50px] rounded-[3rem]" />
+        <div className="relative p-8 rounded-[2rem] bg-linear-to-br from-card to-card/50 border border-white/10 shadow-xl overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10" />
 
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Este mês
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            <FinanceSummaryCard
-              title="Receitas"
-              amount={totalIncome}
-              icon={<TrendingUp className="text-success" size={24} />}
-              variant="income"
-              subtitle="Este mês"
-            />
-            <FinanceSummaryCard
-              title="Despesas"
-              amount={totalExpenses}
-              icon={<TrendingDown className="text-danger" size={24} />}
-              variant="expense"
-              subtitle="Este mês"
-            />
+          <div className="relative z-10 flex items-center justify-between mb-8">
+            <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Wallet className="w-4 h-4" /> {t('dashboard.totalBalance')}
+            </span>
+            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+              {currencyCode}
+            </span>
           </div>
-        </section>
-      </div>
 
-      <div className="px-6 pt-2 pb-24 space-y-6">
-        <Card className="border border-border rounded-xl transition-shadow duration-200 hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Receitas e despesas mensais</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={monthlyData} barCategoryGap="20%" barGap={8}>
-                <XAxis
-                  dataKey="month"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => formatCurrency(value)}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    maxWidth: '200px',
-                  }}
-                  wrapperStyle={{ outline: 'none' }}
-                  cursor={{ fill: 'var(--muted)', fillOpacity: 0.15 }}
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length || !label) return null;
-                    return (
-                      <div className="shadow-md rounded-lg border border-border bg-card p-2.5">
-                        <p className="text-xs font-medium text-muted-foreground mb-1.5">
-                          {label}
-                        </p>
-                        {payload.map((entry) => (
-                          <p
-                            key={entry.dataKey}
-                            className="text-sm font-medium tabular-nums"
-                            style={{ color: entry.color }}
-                          >
-                            {entry.name}:{' '}
-                            {formatCurrency(Number(entry.value ?? 0))}
-                          </p>
-                        ))}
-                      </div>
-                    );
-                  }}
-                />
-                <Bar
-                  dataKey="receitas"
-                  name="Receitas"
-                  fill="#22c55e"
-                  radius={[8, 8, 0, 0]}
-                />
-                <Bar
-                  dataKey="despesas"
-                  name="Despesas"
-                  fill="#ef4444"
-                  radius={[8, 8, 0, 0]}
-                />
-                <Legend />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          <div className="relative z-10">
+            <h2 className="text-5xl font-extrabold text-foreground tracking-tight mb-2">
+              {transactionsLoading ? '...' : formatCurrency(balance)}
+            </h2>
+          </div>
 
-        <Card className="border border-border rounded-xl transition-shadow duration-200 hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Gastos por categoria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-6">
-              <ResponsiveContainer width="40%" height={150}>
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={60}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-2">
-                {categoryData.map((category) => (
-                  <div
-                    key={category.name}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <span className="text-sm">{category.name}</span>
-                    </div>
-                    <span className="text-sm font-medium">
-                      {formatCurrency(category.value)}
-                    </span>
-                  </div>
-                ))}
+          <div className="relative z-10 mt-8 grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <ArrowUpRight className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {t('dashboard.income')}
+                </p>
+                <p className="font-semibold text-sm">
+                  {formatCurrency(totalIncome)}
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Transações recentes
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="transition-colors duration-200"
-              onClick={() => router.push('/transactions')}
-            >
-              Ver todas
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                <ArrowDownRight className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {t('dashboard.expense')}
+                </p>
+                <p className="font-semibold text-sm">
+                  {formatCurrency(totalExpenses)}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            {recentTransactions.length === 0 && !transactionsLoading ? (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma transação recente.
-              </p>
-            ) : (
-              recentTransactions.map((transaction) => (
-                <TransactionCard
-                  key={transaction.id}
-                  {...transaction}
-                  source={
-                    'source' in transaction ? transaction.source : undefined
-                  }
+        </div>
+      </section>
+
+      {/* Quick Actions */}
+      <section className="grid grid-cols-2 gap-4">
+        <button
+          type="button"
+          onClick={() => router.push('/transactions/new?type=income')}
+          className="p-4 rounded-2xl bg-secondary border border-white/5 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all group"
+        >
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <ArrowUpRight className="w-6 h-6 text-primary" />
+          </div>
+          <span className="font-medium text-sm">{t('dashboard.receive')}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push('/transactions/new?type=expense')}
+          className="p-4 rounded-2xl bg-secondary border border-white/5 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all group"
+        >
+          <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <ArrowDownRight className="w-6 h-6 text-destructive" />
+          </div>
+          <span className="font-medium text-sm">{t('dashboard.send')}</span>
+        </button>
+      </section>
+
+      {/* Chart */}
+      <section className="h-40 w-full mt-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData}>
+            <defs>
+              <linearGradient
+                id="colorBalanceDashboard"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="5%"
+                  stopColor="var(--primary)"
+                  stopOpacity={0.3}
                 />
-              ))
-            )}
-          </div>
-        </section>
-      </div>
+                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--card)',
+                border: 'none',
+                borderRadius: '12px',
+              }}
+              itemStyle={{ color: 'var(--foreground)' }}
+            />
+            <Area
+              type="monotone"
+              dataKey="balance"
+              stroke="var(--primary)"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorBalanceDashboard)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </section>
 
-      <FloatingActionButton onClick={() => router.push('/transactions/new')} />
-      <BottomNav />
+      {/* Recent Transactions */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold">{t('dashboard.recent')}</h3>
+          <button
+            type="button"
+            onClick={() => router.push('/transactions')}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {t('dashboard.viewAll')}
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {recentTransactions.length > 0 ? (
+            recentTransactions.map((tx) => (
+              <TransactionCard
+                key={tx.id}
+                id={tx.id}
+                type={(tx.type as 'income' | 'expense') ?? 'expense'}
+                name={tx.name ?? ''}
+                amount={Number((tx as { amount?: number }).amount ?? 0)}
+                category={tx.category}
+                paymentMethod={tx.paymentMethod}
+                date={tx.date as string}
+                source={'source' in tx ? tx.source : undefined}
+                onEdit={
+                  tx.source !== 'rule'
+                    ? () => router.push(`/transactions/${tx.id}/edit`)
+                    : undefined
+                }
+                onDelete={
+                  tx.source !== 'rule' && tx.id
+                    ? () => {
+                        if (
+                          confirm(t('transactions.deleteTransactionConfirm'))
+                        ) {
+                          removeTransaction(tx.id);
+                        }
+                      }
+                    : undefined
+                }
+              />
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground border border-dashed border-white/10 rounded-2xl">
+              {t('dashboard.noRecentTransactions')}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FAB */}
+      <button
+        type="button"
+        onClick={() => router.push('/transactions/new')}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-[0_8px_30px_hsl(173_80%_40%/0.5)] hover:scale-105 active:scale-95 transition-all z-40"
+        aria-label={t('transactions.newTransaction')}
+      >
+        <Plus className="w-6 h-6" strokeWidth={3} />
+      </button>
     </div>
   );
 }

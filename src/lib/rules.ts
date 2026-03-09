@@ -72,6 +72,7 @@ export function calculateExpensesFromRules(
       amount: calculateRuleAmount(rule.amount, totalIncome, rule.amountType),
       category: rule.category ?? '',
       date: dateStr,
+      paymentMethod: rule.paymentMethod,
       source: 'rule' as const,
       ruleId: rule.id,
     }));
