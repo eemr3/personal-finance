@@ -66,7 +66,7 @@ function LoginPageContent() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
-            className="w-full bg-card border-2 border-border rounded-xl py-4 px-6 flex items-center justify-center gap-3 hover:bg-accent hover:border-accent-foreground/20 transition-all duration-200 group"
+            className="w-full bg-card border-2 border-border rounded-xl py-4 px-6 flex items-center justify-center gap-3 hover:bg-transparent hover:border-accent-foreground/20 transition-all duration-200 group"
           >
             {/* Ícone do Google */}
             <svg className="w-6 h-6" viewBox="0 0 24 24">
