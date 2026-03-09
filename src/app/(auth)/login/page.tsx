@@ -1,4 +1,5 @@
 'use client';
+import { Capacitor } from '@capacitor/core';
 import { motion } from 'motion/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
@@ -19,13 +20,24 @@ function LoginPageContent() {
 
   useEffect(() => {
     if (user) {
-      router.replace(redirectTo);
+      // No Capacitor: window.location força reload completo no WebView,
+      // evitando tela em branco após retorno do fluxo nativo do Google
+      if (Capacitor.isNativePlatform()) {
+        window.location.href = redirectTo;
+      } else {
+        router.replace(redirectTo);
+      }
     }
   }, [user, router, redirectTo]);
 
   async function handleGoogleLogin() {
     try {
       await signInWithGoogle();
+      // Redirect explícito após login: no Capacitor o auth state pode demorar
+      // a propagar; usar window.location garante navegação após o fluxo nativo
+      if (Capacitor.isNativePlatform()) {
+        window.location.href = redirectTo;
+      }
     } catch (error) {
       console.error(error);
     }
