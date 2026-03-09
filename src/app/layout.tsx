@@ -1,26 +1,22 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AppearanceProvider } from '@/contexts/AppearanceContext';
 import { I18nProvider } from '@/components/I18nProvider';
 import { PeriodProvider } from '@/contexts/PeriodContext';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const inter = Inter({
+  variable: '--font-sans',
   subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
   title: 'Personal Finance',
   description: 'Personal Finance',
   manifest: '/manifest.json',
-  themeColor: '#0a2d2d',
+  themeColor: '#0d1413',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -42,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} antialiased font-sans`}
       >
         <ThemeProvider>
           <AppearanceProvider>

@@ -9,6 +9,7 @@ import {
   FIXED_EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
 } from '@/lib/categories';
+import { PAYMENT_METHOD_KEYS } from '@/lib/payment-methods';
 import { getPeriodRange } from '@/lib/period';
 import type { CategoryOption } from '@/types/categories';
 import { ArrowLeft } from 'lucide-react';
@@ -34,6 +35,7 @@ export function NewTransactionPage() {
     name: '',
     amount: '',
     category: '',
+    paymentMethod: '',
     date: '',
     notes: '',
   });
@@ -63,12 +65,16 @@ export function NewTransactionPage() {
     e.preventDefault();
     const date = formData.date || new Date().toISOString().split('T')[0];
 
-    await addTransaction({
+    const payload: Record<string, unknown> = {
       ...formData,
       date,
       type: transactionType,
       createdAt: new Date(),
-    });
+    };
+    if (transactionType === 'expense' && formData.paymentMethod) {
+      payload.paymentMethod = formData.paymentMethod;
+    }
+    await addTransaction(payload);
     router.push('/transactions');
   };
 
@@ -171,6 +177,25 @@ export function NewTransactionPage() {
             required
           />
         </div>
+
+        {transactionType === 'expense' && (
+          <div>
+            <Select
+              label={t('transactions.paymentMethod')}
+              options={[
+                { value: '', label: t('transactions.paymentMethodPlaceholder') },
+                ...PAYMENT_METHOD_KEYS.map((key) => ({
+                  value: key,
+                  label: t(`transactions.paymentMethods.${key}`),
+                })),
+              ]}
+              value={formData.paymentMethod}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setFormData({ ...formData, paymentMethod: e.target.value })
+              }
+            />
+          </div>
+        )}
 
         <div>
           <Input

@@ -4,19 +4,17 @@ import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { clsx } from 'clsx';
 
-import { AppHeader } from '@/components/AppHeader';
-import { BottomNav } from '@/components/BottomNav';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 
 const FILTER_OPTIONS = [
-  { value: 'all' as const, label: 'All' },
-  { value: 'income' as const, label: 'Income' },
-  { value: 'expense' as const, label: 'Expenses' },
+  { value: 'all' as const, labelKey: 'transactions.all' as const },
+  { value: 'income' as const, labelKey: 'transactions.income' as const },
+  { value: 'expense' as const, labelKey: 'transactions.expense' as const },
 ] as const;
 
 function TransactionsPage() {
@@ -32,15 +30,13 @@ function TransactionsPage() {
   } = useTransactionsWithRules();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
-    'all',
+    'all'
   );
 
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     const txType = (t: { type?: unknown }) =>
-      String(t.type ?? '')
-        .toLowerCase()
-        .trim();
+      String(t.type ?? '').toLowerCase().trim();
     return allTransactionsForDisplay.filter((transaction) => {
       const matchesSearch =
         !query ||
@@ -56,132 +52,124 @@ function TransactionsPage() {
   }, [allTransactionsForDisplay, searchQuery, filterType]);
 
   if (loading) {
-    return <p>Carregando...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">{t('common.loading')}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="px-4 pb-4">
-        <AppHeader
-          title={t('transactions.title')}
-          subtitle={t('transactions.subtitle')}
+    <div className="p-6 space-y-6">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">
+          {t('transactions.title')}
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          {t('transactions.completeHistory')}
+        </p>
+      </header>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <MonthSelector />
+      </div>
+
+      {/* Summary */}
+      <section className="grid grid-cols-2 gap-4">
+        <div className="rounded-2xl bg-card border border-white/5 p-4">
+          <p className="text-xs text-muted-foreground mb-1">
+            {t('dashboard.income')}
+          </p>
+          <p className="text-xl font-semibold text-success">
+            {formatCurrency(totalIncome)}
+          </p>
+        </div>
+        <div className="rounded-2xl bg-card border border-white/5 p-4">
+          <p className="text-xs text-muted-foreground mb-1">
+            {t('dashboard.expense')}
+          </p>
+          <p className="text-xl font-semibold text-danger">
+            {formatCurrency(totalExpenses)}
+          </p>
+        </div>
+      </section>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder={t('transactions.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-secondary border border-white/5 rounded-2xl h-14 pl-12 pr-4 focus:outline-none focus:border-primary/50 transition-colors"
         />
       </div>
 
-      <div className="px-6 pt-2 pb-24 bg-linear-to-b from-primary/5 via-background to-background min-h-[50vh]">
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <MonthSelector />
-        </div>
-
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Resumo
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-all duration-200">
-              <p className="text-sm text-muted-foreground mb-1">
-                Total receitas
-              </p>
-              <p className="text-xl font-medium text-success">
-                {formatCurrency(totalIncome)}
-              </p>
-            </div>
-            <div className="rounded-xl border border-border bg-card p-4 hover:bg-accent/50 transition-all duration-200">
-              <p className="text-sm text-muted-foreground mb-1">
-                Total despesas
-              </p>
-              <p className="text-xl font-medium text-danger">
-                {formatCurrency(totalExpenses)}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="relative mb-6">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            size={20}
-          />
-          <input
-            type="text"
-            placeholder="Search transactions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
-          />
-        </div>
-
-        <div className="flex gap-2 mb-6">
-          {FILTER_OPTIONS.map(({ value, label }) => {
-            const isActive = filterType === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setFilterType(value)}
-                className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ease-out ${
-                  isActive
-                    ? value === 'all'
-                      ? 'bg-primary/10 border-primary/40 text-foreground font-medium'
-                      : value === 'income'
-                        ? 'bg-success/10 border-success/40 text-success font-medium'
-                        : 'bg-danger/10 border-danger/40 text-danger font-medium'
-                    : 'bg-card border-border text-muted-foreground hover:bg-accent/80'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-
-        <section>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            {t('transactions.title')}
-          </h2>
-          <div className="space-y-2">
-            {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((transaction) => {
-                const isManual = transaction.source !== 'rule';
-                return (
-                  <TransactionCard
-                    key={transaction.id}
-                    {...transaction}
-                    onEdit={
-                      isManual
-                        ? () =>
-                            router.push(`/transactions/${transaction.id}/edit`)
-                        : undefined
-                    }
-                    onDelete={
-                      isManual
-                        ? () => {
-                            if (
-                              confirm(
-                                t('transactions.deleteTransactionConfirm'),
-                              )
-                            ) {
-                              removeTransaction(transaction.id);
-                            }
-                          }
-                        : undefined
-                    }
-                  />
-                );
-              })
-            ) : (
-              <div className="rounded-xl border border-border border-dashed bg-card/50 px-6 py-12 text-center">
-                <p className="text-muted-foreground">
-                  {t('transactions.noTransactionsFound')}
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
+      {/* Filters */}
+      <div className="flex p-1 bg-secondary rounded-xl">
+        {FILTER_OPTIONS.map(({ value, labelKey }) => {
+          const isActive = filterType === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFilterType(value)}
+              className={clsx(
+                'flex-1 py-2 text-sm font-medium rounded-lg capitalize transition-all',
+                isActive
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {t(labelKey)}
+            </button>
+          );
+        })}
       </div>
 
-      <FloatingActionButton onClick={() => router.push('/transactions/new')} />
-      <BottomNav />
+      {/* List */}
+      <div className="space-y-3 pb-24">
+        {filteredTransactions.length > 0 ? (
+          filteredTransactions.map((transaction) => {
+            const isManual = transaction.source !== 'rule';
+            return (
+              <TransactionCard
+                key={transaction.id}
+                id={transaction.id}
+                type={(transaction.type as 'income' | 'expense') ?? 'expense'}
+                name={transaction.name ?? ''}
+                amount={Number((transaction as { amount?: number }).amount ?? 0)}
+                category={transaction.category}
+                paymentMethod={transaction.paymentMethod}
+                date={transaction.date as string}
+                source={transaction.source}
+                onEdit={
+                  isManual
+                    ? () =>
+                        router.push(`/transactions/${transaction.id}/edit`)
+                    : undefined
+                }
+                onDelete={
+                  isManual && transaction.id
+                    ? () => {
+                        if (
+                          confirm(t('transactions.deleteTransactionConfirm'))
+                        ) {
+                          removeTransaction(transaction.id);
+                        }
+                      }
+                    : undefined
+                }
+              />
+            );
+          })
+        ) : (
+          <div className="text-center py-12 text-muted-foreground border border-dashed border-white/10 rounded-2xl">
+            {t('transactions.noTransactionsFound')}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -21,6 +21,7 @@ interface TransactionCardProps {
   name: string;
   amount: number;
   category?: string | null;
+  paymentMethod?: string | null;
   date: string | { toDate: () => Date };
   icon?: React.ReactNode;
   onClick?: () => void;
@@ -34,6 +35,7 @@ export function TransactionCard({
   name,
   amount,
   category,
+  paymentMethod,
   date,
   icon,
   onClick,
@@ -44,7 +46,6 @@ export function TransactionCard({
   const { formatCurrency } = useFormatCurrency();
   const { formatDate } = useFormatDate();
   const isIncome = type === 'income';
-  const amountColor = isIncome ? 'text-success' : 'text-danger';
   const canEdit = source !== 'rule' && (onEdit || onDelete);
   const { t } = useTranslation();
   /** Transações de regra (despesa fixa) usam categorias de categoriesFixedExpense */
@@ -52,52 +53,74 @@ export function TransactionCard({
 
   return (
     <div
-      className="bg-card rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+      className="flex items-center justify-between p-4 rounded-2xl bg-card border border-white/5 hover:bg-white/[0.02] transition-colors group cursor-pointer"
       onClick={onClick}
     >
-      <div
-        className={`w-12 h-12 rounded-full flex items-center justify-center ${isIncome ? 'bg-success/10' : 'bg-danger/10'}`}
-      >
+      <div className="flex items-center gap-4">
+        <div
+          className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner border ${
+            isIncome
+              ? 'bg-primary/10 text-primary border-primary/20'
+              : 'bg-danger/10 text-danger border-danger/20'
+          }`}
+        >
         {icon || (
           <CategoryIcon
             category={category ?? 'other'}
-            className={`${type === 'income' ? 'text-success' : 'text-danger'}`}
+            className={isIncome ? 'text-primary' : 'text-danger'}
           />
         )}
+        </div>
+        <div>
+          <h4 className="font-medium text-foreground text-base mb-0.5 truncate">
+            {name}
+          </h4>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{formatDate(date)}</span>
+            {category && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                <span className="truncate max-w-[100px]">
+                  {getCategoryLabel(category, categoryTypeForLabel, t)}
+                  {paymentMethod &&
+                    ` · ${t(`transactions.paymentMethods.${paymentMethod}`)}`}
+                </span>
+              </>
+            )}
+            {source === 'rule' && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                <span>({t('settings.fixedExpenseRules.rule')})</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <h4 className="truncate">{name}</h4>
-        <p className="text-sm text-muted-foreground">
-          {category ? getCategoryLabel(category, categoryTypeForLabel, t) : ''}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="text-right min-w-[100px]">
-          <p className={`font-medium ${amountColor}`}>
-            {isIncome ? '+' : '-'} {formatCurrency(Number(amount))}
-          </p>
-          <p className="text-xs text-muted-foreground">{formatDate(date)}</p>
-          {source === 'rule' && (
-            <span className="text-xs text-muted-foreground">
-              ({t('settings.fixedExpenseRules.rule')})
-            </span>
-          )}
+      <div className="flex items-center gap-3">
+        <div className="text-right">
+          <span
+            className={`font-bold text-[15px] flex items-center gap-1 ${
+              isIncome ? 'text-primary' : 'text-foreground'
+            }`}
+          >
+            {isIncome ? '+' : '-'}
+            {formatCurrency(Number(amount))}
+          </span>
         </div>
         {canEdit ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center justify-center rounded-lg"
                 onClick={(e) => e.stopPropagation()}
                 aria-label="Ações"
               >
-                <MoreVertical size={24} />
+                <MoreVertical size={20} />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-card border-white/10">
               {onEdit && (
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -115,7 +138,7 @@ export function TransactionCard({
                     e.stopPropagation();
                     onDelete();
                   }}
-                  className="text-danger"
+                  className="text-destructive focus:text-destructive focus:bg-destructive/10"
                 >
                   <Trash2 size={16} className="mr-2" />
                   {t('transactions.delete')}
@@ -123,9 +146,7 @@ export function TransactionCard({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <span className="w-10 h-10 shrink-0" aria-hidden />
-        )}
+        ) : null}
       </div>
     </div>
   );

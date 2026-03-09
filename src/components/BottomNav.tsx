@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { Home, Receipt, Settings } from 'lucide-react';
+import { CreditCard, Home, ListFilter, Settings } from 'lucide-react';
+import { clsx } from 'clsx';
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -11,35 +12,50 @@ export function BottomNav() {
 
   const navItems = [
     { path: '/dashboard', icon: Home, labelKey: 'bottomNav.home' as const },
-    { path: '/transactions', icon: Receipt, labelKey: 'bottomNav.transactions' as const },
+    { path: '/transactions', icon: ListFilter, labelKey: 'bottomNav.transactions' as const },
+    { path: '/cards', icon: CreditCard, labelKey: 'bottomNav.cards' as const },
     { path: '/settings', icon: Settings, labelKey: 'bottomNav.settings' as const },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset-bottom">
-      <div className="flex justify-around items-center h-16 px-4">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <nav className="w-full max-w-md glass-panel border-t border-white/10 px-6 py-4 flex items-center justify-between shadow-2xl">
         {navItems.map((item) => {
           const isActive =
-            pathname === item.path ||
-            pathname.startsWith(item.path + '/');
+            pathname === item.path || pathname.startsWith(item.path + '/');
           const Icon = item.icon;
 
           return (
             <Link
               key={item.path}
               href={item.path}
-              className={`flex flex-col items-center justify-center gap-1 min-w-[70px] py-2 px-3 rounded-xl transition-colors ${
-                isActive
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={clsx(
+                'flex flex-col items-center gap-1.5 transition-all duration-300 relative',
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              )}
             >
-              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-xs">{t(item.labelKey)}</span>
+              {isActive && (
+                <div className="absolute -top-4 w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_2px_hsl(173_80%_40%_/_0.8)]" />
+              )}
+              <Icon
+                strokeWidth={isActive ? 2.5 : 2}
+                className={clsx(
+                  'w-6 h-6 transition-transform duration-300',
+                  isActive && '-translate-y-1'
+                )}
+              />
+              <span
+                className={clsx(
+                  'text-[10px] font-medium transition-opacity duration-300',
+                  isActive ? 'opacity-100' : 'opacity-0 absolute'
+                )}
+              >
+                {t(item.labelKey)}
+              </span>
             </Link>
           );
         })}
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }

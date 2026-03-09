@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { LogOut, User, Settings } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,9 +22,11 @@ export interface AppHeaderProps {
   subtitle?: React.ReactNode;
   /** Conteúdo extra à esquerda, antes do avatar (ex: filtros, busca) */
   children?: React.ReactNode;
+  /** Conteúdo extra abaixo do título, dentro do header (ex: card na tela de Cartões) */
+  bottomContent?: React.ReactNode;
 }
 
-export function AppHeader({ title, subtitle, children }: AppHeaderProps) {
+export function AppHeader({ title, subtitle, children, bottomContent }: AppHeaderProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, logout } = useAuth();
@@ -55,7 +57,7 @@ export function AppHeader({ title, subtitle, children }: AppHeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full hover:bg-white/15 focus-visible:ring-white/50"
+              className="rounded-full hover:bg-white/15 focus-visible:ring-white/50 shrink-0"
               aria-label={t('header.openMenu')}
             >
               <Avatar>
@@ -71,13 +73,6 @@ export function AppHeader({ title, subtitle, children }: AppHeaderProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => router.push('/settings/profile')}
-                className="cursor-pointer"
-              >
-                <User size={16} className="mr-2" />
-                {t('header.profile')}
-              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => router.push('/settings')}
                 className="cursor-pointer"
@@ -100,6 +95,12 @@ export function AppHeader({ title, subtitle, children }: AppHeaderProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {bottomContent && (
+        <div className="mt-4">
+          {bottomContent}
+        </div>
+      )}
     </header>
   );
 }

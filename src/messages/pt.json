@@ -24,7 +24,16 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Aqui está sua visão geral financeira"
+    "subtitle": "Aqui está sua visão geral financeira",
+    "goodMorning": "Bom dia",
+    "totalBalance": "Saldo total",
+    "income": "Receitas",
+    "expense": "Despesas",
+    "receive": "Receber",
+    "send": "Enviar",
+    "recent": "Recentes",
+    "viewAll": "Ver todas",
+    "noRecentTransactions": "Nenhuma transação recente"
   },
   "header": {
     "openMenu": "Abrir menu",
@@ -33,6 +42,9 @@
     "logout": "Sair"
   },
   "transactions": {
+    "completeHistory": "Seu histórico financeiro completo",
+    "searchPlaceholder": "Buscar transações...",
+    "all": "Todas",
     "categoriesExpense": {
       "credit_card": "Cartão de Crédito",
       "supermarket": "Supermercado",
@@ -81,10 +93,28 @@
     "noTransactionsFound": "Nenhuma transação encontrada",
     "deleteTransactionConfirm": "Excluir esta transação?",
     "delete": "Excluir",
-    "edit": "Editar"
+    "edit": "Editar",
+    "paymentMethod": "Forma de pagamento",
+    "paymentMethodPlaceholder": "Selecione a forma de pagamento",
+    "paymentMethods": {
+      "credit_personal": "Cartão de crédito pessoal",
+      "credit_business": "Cartão de crédito empresarial",
+      "pix": "Pix",
+      "cash": "Dinheiro"
+    }
   },
   "settings": {
     "subtitle": "Gerencie as preferências do app",
+    "preferences": "Preferências",
+    "currency": "Moeda",
+    "language": "Idioma",
+    "theme": "Tema",
+    "automationsAndRules": "Automações e regras",
+    "addNew": "Adicionar",
+    "securityAndPrivacy": "Segurança e privacidade",
+    "noActiveRules": "Nenhuma regra de automação ativa.",
+    "deleteRuleConfirm": "Excluir esta regra?",
+    "comingSoon": "Em breve",
     "fixedExpenseRules": {
       "description": "Configure regras de despesas fixas",
       "rule": "regra"
@@ -151,14 +181,28 @@
       "fixedAmount": "Valor fixo",
       "percentageAmount": "Percentual",
       "saveChanges": "Salvar alterações",
-      "category": "Categoria"
+      "category": "Categoria",
+      "paymentMethod": "Forma de pagamento"
     },
     "conditionIncomeAboveContains": "receita",
     "conditionDayOfMonthContains": "dia"
   },
+  "cards": {
+    "title": "Cartões",
+    "subtitle": "Resumo mensal de gastos por cartão",
+    "allCards": "Todos os cartões",
+    "recentActivity": "Atividade recente",
+    "creditPersonal": "Cartão pessoal",
+    "creditBusiness": "Cartão empresarial",
+    "totalMonth": "Total no mês",
+    "ofIncome": "da renda",
+    "noCardExpenses": "Nenhum gasto com cartão neste mês",
+    "transactionsCount": "{{count}} transações"
+  },
   "bottomNav": {
     "home": "Início",
     "transactions": "Transações",
+    "cards": "Cartões",
     "settings": "Configurações"
   },
   "monthSelector": {

@@ -4,8 +4,8 @@
   "description": "Personal Finance",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0E3E3E",
-  "theme_color": "#0a2d2d",
+  "background_color": "#0d1413",
+  "theme_color": "#0d1413",
   "orientation": "portrait",
   "icons": [
     {

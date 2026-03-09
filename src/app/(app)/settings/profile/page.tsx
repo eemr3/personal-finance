@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BottomNav } from '@/components/BottomNav';
 import { ArrowLeft, User } from 'lucide-react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
@@ -120,8 +119,6 @@ function ProfilePage() {
           </div>
         </section>
       </div>
-
-      <BottomNav />
     </div>
   );
 }
