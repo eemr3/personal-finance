@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card } from './Card';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
-import { formatCategoryLabel } from '@/lib/categories';
+import { getCategoryLabel } from '@/lib/categories';
+import { useTranslation } from 'react-i18next';
 
 interface RuleCardProps {
   id: string;
@@ -26,12 +27,14 @@ export function RuleCard({
   onDelete,
 }: RuleCardProps) {
   const [showMenu, setShowMenu] = React.useState(false);
-
+  const { t } = useTranslation();
   const isPercentage = amountType === 'percentage' || amount.includes('%');
   const displayAmount =
     !isPercentage && formatCurrency
       ? formatCurrency(parseFloat(amount.replace(',', '.')) || 0)
-      : amount;
+      : amount.includes('%')
+        ? amount
+        : `${amount}%`;
 
   return (
     <Card className="relative border border-border rounded-xl hover:bg-accent/50 hover:border-border transition-all duration-200 ease-out">
@@ -44,7 +47,7 @@ export function RuleCard({
               {displayAmount}
             </span>
             <span className="inline-block px-3 py-1.5 bg-muted text-muted-foreground rounded-lg text-sm">
-              {formatCategoryLabel(category)}
+              {getCategoryLabel(category ?? '', 'fixed', t)}
             </span>
           </div>
         </div>
@@ -54,7 +57,7 @@ export function RuleCard({
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 hover:bg-muted rounded-lg transition-colors duration-200"
             type="button"
-            aria-label="Ações"
+            aria-label={t('common.actions')}
           >
             <MoreVertical size={20} />
           </button>
@@ -75,7 +78,7 @@ export function RuleCard({
                   className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted rounded-lg transition-colors duration-200 text-left"
                 >
                   <Edit size={18} />
-                  <span>Editar</span>
+                  <span>{t('common.edit')}</span>
                 </button>
                 <button
                   type="button"
@@ -86,7 +89,7 @@ export function RuleCard({
                   className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-danger/10 text-danger rounded-lg transition-colors duration-200 text-left"
                 >
                   <Trash2 size={18} />
-                  <span>Excluir</span>
+                  <span>{t('common.delete')}</span>
                 </button>
               </div>
             </>

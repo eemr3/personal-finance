@@ -14,6 +14,10 @@ export type CurrencyInputConfig = {
   position: 'prefix' | 'suffix';
   prefix: string;
   suffix: string;
+  /** Classe de padding-left do input quando prefixo (ex.: pl-8 para $ colado, pl-12 para R$ com espaço). */
+  inputPlClass: string;
+  /** Classe de padding-right do input quando sufixo. */
+  inputPrClass: string;
 };
 
 /**
@@ -25,20 +29,44 @@ export function getCurrencySymbol(currency: FormatCurrencyCode): string {
 
 /**
  * Configuração para exibir moeda em inputs (símbolo + espaçamento conforme idioma).
- * BRL: prefixo "R$ " (espaço após). USD: prefixo "$" (sem espaço). EUR: sufixo " €" (espaço antes).
+ * BRL: prefixo "R$ " (espaço após) → pl-12. USD: prefixo "$" (sem espaço) → pl-8. EUR: sufixo " €".
  */
 export function getCurrencyInputConfig(
   currency: FormatCurrencyCode,
 ): CurrencyInputConfig {
   switch (currency) {
     case 'brl':
-      return { position: 'prefix', prefix: 'R$ ', suffix: '' };
+      return {
+        position: 'prefix',
+        prefix: 'R$ ',
+        suffix: '',
+        inputPlClass: 'pl-12',
+        inputPrClass: 'pr-4',
+      };
     case 'usd':
-      return { position: 'prefix', prefix: '$', suffix: '' };
+      return {
+        position: 'prefix',
+        prefix: '$',
+        suffix: '',
+        inputPlClass: 'pl-8',
+        inputPrClass: 'pr-4',
+      };
     case 'eur':
-      return { position: 'suffix', prefix: '', suffix: ' €' };
+      return {
+        position: 'suffix',
+        prefix: '',
+        suffix: ' €',
+        inputPlClass: 'pl-4',
+        inputPrClass: 'pr-10',
+      };
     default:
-      return { position: 'prefix', prefix: 'R$ ', suffix: '' };
+      return {
+        position: 'prefix',
+        prefix: 'R$ ',
+        suffix: '',
+        inputPlClass: 'pl-12',
+        inputPrClass: 'pr-4',
+      };
   }
 }
 

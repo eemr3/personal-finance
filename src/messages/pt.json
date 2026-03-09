@@ -7,7 +7,9 @@
     "cancel": "Cancelar",
     "delete": "Excluir",
     "edit": "Editar",
-    "return": "Voltar"
+    "return": "Voltar",
+    "actions": "Ações",
+    "close": "Fechar"
   },
   "login": {
     "title": "Finanças Pessoais",
@@ -31,6 +33,36 @@
     "logout": "Sair"
   },
   "transactions": {
+    "categoriesExpense": {
+      "credit_card": "Cartão de Crédito",
+      "supermarket": "Supermercado",
+      "food": "Alimentação",
+      "computer": "Informática",
+      "transport": "Transporte",
+      "health": "Saúde",
+      "education": "Educação",
+      "entertainment": "Entretenimento",
+      "home_cleaning": "Casa e limpeza",
+      "other": "Outras despesas"
+    },
+    "categoriesIncome": {
+      "salary": "Salário",
+      "freelance": "Freelance",
+      "investment": "Investimentos",
+      "business": "Negócio",
+      "other": "Outras receitas"
+    },
+    "categoriesFixedExpense": {
+      "education": "Educação",
+      "religious": "Religioso",
+      "taxes": "Impostos",
+      "subscriptions": "Assinaturas",
+      "utilities": "Serviços",
+      "insurance": "Seguros",
+      "debt": "Dívidas",
+      "savings": "Poupança",
+      "other": "Outros"
+    },
     "title": "Transações",
     "subtitle": "Acompanhe suas receitas e despesas",
     "newTransaction": "Nova transação",
@@ -43,23 +75,13 @@
     "category": "Categoria",
     "categoryPlaceholder": "Selecione uma categoria",
     "date": "Data",
-    "notes": "Observações (Opcional)",
+    "notes": "Observações (opcional)",
     "notesPlaceholderExpense": "Ex: compra para o jantar de domingo",
-    "notesPlaceholderIncome": "Ex: pagamento de salário de março",
-    "salary": "Salário",
-    "freelance": "Freelance",
-    "investment": "Investimento",
-    "business": "Negócio",
-    "otherIncome": "Outras receitas",
-    "creditCard": "Cartão de Crédito",
-    "supermarket": "Supermercado",
-    "food": "Alimentação",
-    "computer": "Informática",
-    "transport": "Transporte",
-    "health": "Saúde",
-    "education": "Educação",
-    "entertainment": "Entretenimento",
-    "other": "Outros"
+    "notesPlaceholderIncome": "Ex: pagamento do salário de março",
+    "noTransactionsFound": "Nenhuma transação encontrada",
+    "deleteTransactionConfirm": "Excluir esta transação?",
+    "delete": "Excluir",
+    "edit": "Editar"
   },
   "settings": {
     "subtitle": "Gerencie as preferências do app",
@@ -68,7 +90,28 @@
       "rule": "regra"
     },
     "appearance": {
-      "description": "Personalize o tema e a exibição do app"
+      "title": "Aparência",
+      "description": "Personalize o tema e a exibição do app",
+      "theme": "Tema",
+      "themeLight": "Claro",
+      "themeLightDesc": "Interface limpa e clara",
+      "themeDark": "Escuro",
+      "themeDarkDesc": "Confortável à noite",
+      "themeSystem": "Sistema",
+      "themeSystemDesc": "Seguir preferência do dispositivo",
+      "currency": "Moeda",
+      "currencyUsd": "Dólar americano",
+      "currencyUsdDesc": "USD - Estados Unidos",
+      "currencyBrl": "Real brasileiro",
+      "currencyBrlDesc": "BRL - Brasil",
+      "currencyEur": "Euro",
+      "currencyEurDesc": "EUR - União Europeia",
+      "dateFormat": "Formato de data",
+      "dateFormatExample": "Exemplo:",
+      "language": "Idioma",
+      "languageEn": "Inglês",
+      "languagePt": "Português",
+      "languageEs": "Espanhol"
     },
     "profile": {
       "description": "Gerencie suas informações pessoais",
@@ -82,6 +125,35 @@
       "email": "Email",
       "providerName": "Google"
     }
+  },
+  "fixedExpenses": {
+    "rules": {
+      "title": "Despesas fixas",
+      "description": "Configure regras de despesas que se repetem todo mês.",
+      "noRulesConfigured": "Nenhuma regra configurada ainda.",
+      "addRule": "Adicionar regra",
+      "createFirstRule": "Criar primeira regra",
+      "editRule": "Editar regra",
+      "newRule": "Nova regra",
+      "ruleName": "Nome da regra",
+      "ruleNamePlaceholder": "ex.: Pagamento Trybe",
+      "condition": "Condição",
+      "conditionAlways": "Sempre aplicar",
+      "conditionIncomeAbove": "Quando receita for maior que",
+      "conditionDayOfMonth": "Todo mês no dia",
+      "conditionCustom": "Outra (descreva)",
+      "conditionCustomPlaceholder": "Ex.: Se receita > {{value}} e mês ímpar",
+      "conditionIncomeAboveValue": "Se receita > {{value}}",
+      "conditionDayOfMonthValue": "Mensalmente no dia {{day}}",
+      "conditionDayPlaceholder": "1 a 31",
+      "amountType": "Tipo de valor",
+      "fixedAmount": "Valor fixo",
+      "percentageAmount": "Percentual",
+      "saveChanges": "Salvar alterações",
+      "category": "Categoria"
+    },
+    "conditionIncomeAboveContains": "receita",
+    "conditionDayOfMonthContains": "dia"
   },
   "bottomNav": {
     "home": "Início",

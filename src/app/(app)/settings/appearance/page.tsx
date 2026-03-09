@@ -2,6 +2,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
+import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { BottomNav } from '@/components/BottomNav';
 import {
@@ -27,6 +28,7 @@ type Theme = 'light' | 'dark' | 'system';
 
 function AppearancePage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const {
     currency,
@@ -47,21 +49,21 @@ function AppearancePage() {
   }[] = [
     {
       value: 'light',
-      label: 'Claro',
+      label: t('settings.appearance.themeLight'),
       icon: <Sun size={24} />,
-      description: 'Interface limpa e clara',
+      description: t('settings.appearance.themeLightDesc'),
     },
     {
       value: 'dark',
-      label: 'Escuro',
+      label: t('settings.appearance.themeDark'),
       icon: <Moon size={24} />,
-      description: 'Confortável à noite',
+      description: t('settings.appearance.themeDarkDesc'),
     },
     {
       value: 'system',
-      label: 'Sistema',
+      label: t('settings.appearance.themeSystem'),
       icon: <Monitor size={24} />,
-      description: 'Seguir preferência do dispositivo',
+      description: t('settings.appearance.themeSystemDesc'),
     },
   ];
 
@@ -73,21 +75,21 @@ function AppearancePage() {
   }[] = [
     {
       value: 'usd',
-      label: 'US Dollar',
+      label: t('settings.appearance.currencyUsd'),
       symbol: '$',
-      description: 'USD - United States',
+      description: t('settings.appearance.currencyUsdDesc'),
     },
     {
       value: 'brl',
-      label: 'Brazilian Real',
+      label: t('settings.appearance.currencyBrl'),
       symbol: 'R$',
-      description: 'BRL - Brazil',
+      description: t('settings.appearance.currencyBrlDesc'),
     },
     {
       value: 'eur',
-      label: 'Euro',
+      label: t('settings.appearance.currencyEur'),
       symbol: '€',
-      description: 'EUR - European Union',
+      description: t('settings.appearance.currencyEurDesc'),
     },
   ];
 
@@ -106,9 +108,9 @@ function AppearancePage() {
     label: string;
     Flag: React.ComponentType<{ className?: string }>;
   }[] = [
-    { value: 'en', label: 'English', Flag: US },
-    { value: 'pt', label: 'Português', Flag: BR },
-    { value: 'es', label: 'Español', Flag: ES },
+    { value: 'en', label: t('settings.appearance.languageEn'), Flag: US },
+    { value: 'pt', label: t('settings.appearance.languagePt'), Flag: BR },
+    { value: 'es', label: t('settings.appearance.languageEs'), Flag: ES },
   ];
 
   return (
@@ -119,14 +121,14 @@ function AppearancePage() {
             onClick={() => router.push('/settings')}
             className="w-11 h-11 flex items-center justify-center hover:bg-primary/10 rounded-full transition-colors"
             type="button"
-            aria-label="Voltar"
+            aria-label={t('common.back')}
           >
             <ArrowLeft size={24} />
           </button>
           <div className="flex-1">
-            <h1 className="mb-1">Aparência</h1>
+            <h1 className="mb-1">{t('settings.appearance.title')}</h1>
             <p className="text-muted-foreground">
-              Personalize o tema e a exibição do app
+              {t('settings.appearance.description')}
             </p>
           </div>
         </div>
@@ -136,7 +138,7 @@ function AppearancePage() {
         {/* Theme Selection */}
         <section className="mb-10">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Tema
+            {t('settings.appearance.theme')}
           </h2>
           <div className="space-y-2">
             {themeOptions.map((option) => {
@@ -186,7 +188,7 @@ function AppearancePage() {
         {/* Currency Selection */}
         <section className="mb-10">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Moeda
+            {t('settings.appearance.currency')}
           </h2>
           <div className="space-y-2">
             {currencyOptions.map((option) => {
@@ -243,7 +245,7 @@ function AppearancePage() {
         {/* Date Format Selection */}
         <section className="mb-10">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Formato de data
+            {t('settings.appearance.dateFormat')}
           </h2>
           <div className="space-y-2">
             {dateFormatOptions.map((option) => {
@@ -273,7 +275,7 @@ function AppearancePage() {
                       {option.label}
                     </h4>
                     <p className="text-sm text-muted-foreground mt-0.5">
-                      Exemplo: {option.example}
+                      {t('settings.appearance.dateFormatExample')} {option.example}
                     </p>
                   </div>
                   {isSelected && (
@@ -295,7 +297,7 @@ function AppearancePage() {
         {/* Language Selection */}
         <section className="mb-8">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Idioma
+            {t('settings.appearance.language')}
           </h2>
           <div className="space-y-2">
             {languageOptions.map((option) => {

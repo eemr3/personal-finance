@@ -27,7 +27,7 @@ import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
-import { formatCategoryLabel } from '@/lib/categories';
+import { getCategoryLabel, FIXED_EXPENSE_CATEGORIES } from '@/lib/categories';
 import { Plus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -124,16 +124,20 @@ function DashboardPage() {
   const categoryData = useMemo(() => {
     const byCategory: Record<string, number> = {};
     for (const t of allExpenses) {
-      const cat = t.category || 'outros';
+      const cat = t.category || 'other';
       byCategory[cat] = (byCategory[cat] ?? 0) + Number(t.amount ?? 0);
     }
     const entries = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
-    return entries.map(([key], i) => ({
-      name: formatCategoryLabel(key),
-      value: entries[i][1],
-      color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
-    }));
-  }, [allExpenses]);
+    const fixedKeys = FIXED_EXPENSE_CATEGORIES as readonly string[];
+    return entries.map(([key], i) => {
+      const categoryType = fixedKeys.includes(key) ? 'fixed' : 'expense';
+      return {
+        name: getCategoryLabel(key, categoryType, t),
+        value: entries[i][1],
+        color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+      };
+    });
+  }, [allExpenses, t]);
 
   const recentTransactions = useMemo(
     () => allTransactionsForDisplay.slice(0, 5),
@@ -262,7 +266,8 @@ function DashboardPage() {
                             className="text-sm font-medium tabular-nums"
                             style={{ color: entry.color }}
                           >
-                            {entry.name}: {formatCurrency(Number(entry.value ?? 0))}
+                            {entry.name}:{' '}
+                            {formatCurrency(Number(entry.value ?? 0))}
                           </p>
                         ))}
                       </div>

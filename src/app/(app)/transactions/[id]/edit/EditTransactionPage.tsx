@@ -1,31 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { type FormEvent, useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { Input, TextArea, Select } from '@/components/Input';
-import { ArrowLeft } from 'lucide-react';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useTransactions } from '@/features/transactions/hooks/useTransactions';
-
-const incomeCategories = [
-  { value: 'salary', label: 'Salary' },
-  { value: 'freelance', label: 'Freelance' },
-  { value: 'investment', label: 'Investment' },
-  { value: 'business', label: 'Business' },
-  { value: 'other', label: 'Other Income' },
-];
-
-const expenseCategories = [
-  { value: 'cartão_de_crédito', label: 'Cartão de Crédito' },
-  { value: 'supermercado', label: 'Supermercado' },
-  { value: 'informática', label: 'Informática' },
-  { value: 'transporte', label: 'Transporte' },
-  { value: 'saúde', label: 'Saúde' },
-  { value: 'educação', label: 'Educação' },
-  { value: 'entretenimento', label: 'Entretenimento' },
-  { value: 'outros', label: 'Outros' },
-];
+import { getCategoryLabel } from '@/lib/categories';
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/lib/categories';
+import type { CategoryOption } from '@/types/categories';
+import { ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EditTransactionPageProps {
   id: string;
@@ -33,6 +18,7 @@ interface EditTransactionPageProps {
 
 export function EditTransactionPage({ id }: EditTransactionPageProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const { currencyInputConfig } = useFormatCurrency();
   const { transactions, editTransaction, removeTransaction } = useTransactions();
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>(
@@ -65,21 +51,45 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
     }
   }, [transaction]);
 
-  const categories =
-    transactionType === 'income' ? incomeCategories : expenseCategories;
+  const categories: CategoryOption[] = useMemo(() => {
+    const type = transactionType;
+    const base =
+      type === 'income'
+        ? INCOME_CATEGORIES.map((key) => ({
+            value: key,
+            label: t(`transactions.categoriesIncome.${key}`),
+          }))
+        : EXPENSE_CATEGORIES.map((key) => ({
+            value: key,
+            label: t(`transactions.categoriesExpense.${key}`),
+          }));
+    const current = formData.category?.trim();
+    if (current && !base.some((o) => o.value === current)) {
+      return [
+        {
+          value: current,
+          label: getCategoryLabel(current, type, t),
+        },
+        ...base,
+      ];
+    }
+    return base;
+  }, [transactionType, formData.category, t]);
 
   if (!transaction) {
     return (
       <div className="min-h-screen bg-background p-6">
-        <p className="text-muted-foreground">Transação não encontrada.</p>
+        <p className="text-muted-foreground">
+          {t('transactions.noTransactionsFound')}
+        </p>
         <Button variant="ghost" onClick={() => router.back()} className="mt-4">
-          Voltar
+          {t('common.back')}
         </Button>
       </div>
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const date =
       formData.date || new Date().toISOString().split('T')[0];
@@ -92,7 +102,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Excluir esta transação?')) return;
+    if (!confirm(t('transactions.deleteTransactionConfirm'))) return;
     setDeleting(true);
     await removeTransaction(id);
     router.push('/transactions');
@@ -108,7 +118,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
           >
             <ArrowLeft size={24} />
           </button>
-          <h1>Editar Transação</h1>
+          <h1>{t('transactions.edit')}</h1>
           <div className="w-10" />
         </div>
 
@@ -122,7 +132,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
                 : 'bg-card border-border text-foreground hover:bg-accent/80'
             }`}
           >
-            Despesa
+            {t('transactions.expense')}
           </button>
           <button
             type="button"
@@ -133,7 +143,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
                 : 'bg-card border-border text-foreground hover:bg-accent/80'
             }`}
           >
-            Receita
+            {t('transactions.income')}
           </button>
         </div>
       </div>
@@ -144,8 +154,12 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
       >
         <div>
           <Input
-            label="Nome da Transação"
-            placeholder="e.g., Compras de Supermercado"
+            label={t('transactions.name')}
+            placeholder={
+              transactionType === 'expense'
+                ? t('transactions.namePlaceholderExpense')
+                : t('transactions.namePlaceholderIncome')
+            }
             value={formData.name}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setFormData({ ...formData, name: e.target.value })
@@ -156,7 +170,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
 
         <div>
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 block">
-            Valor
+            {t('transactions.amount')}
           </label>
           <div className="relative">
             {currencyInputConfig.prefix ? (
@@ -177,11 +191,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-2xl ${
-                currencyInputConfig.position === 'prefix'
-                  ? 'pl-10 pr-4'
-                  : 'pl-4 pr-10'
-              }`}
+              className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-2xl ${currencyInputConfig.inputPlClass} ${currencyInputConfig.inputPrClass}`}
               required
             />
           </div>
@@ -189,7 +199,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
 
         <div>
           <Select
-            label="Categoria"
+            label={t('transactions.category')}
             options={categories}
             value={formData.category}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -202,7 +212,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
         <div>
           <Input
             type="date"
-            label="Data"
+            label={t('transactions.date')}
             value={formData.date}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setFormData({ ...formData, date: e.target.value })
@@ -213,8 +223,12 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
 
         <div>
           <TextArea
-            label="Observações (Opcional)"
-            placeholder="Adicione qualquer detalhe adicional..."
+            label={t('transactions.notes')}
+            placeholder={
+              transactionType === 'expense'
+                ? t('transactions.notesPlaceholderExpense')
+                : t('transactions.notesPlaceholderIncome')
+            }
             value={formData.notes}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setFormData({ ...formData, notes: e.target.value })
@@ -224,7 +238,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
 
         <div className="pt-2 space-y-3">
           <Button type="submit" fullWidth size="lg">
-            Salvar alterações
+            {t('common.save')}
           </Button>
           <Button
             type="button"
@@ -232,7 +246,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
             fullWidth
             onClick={() => router.back()}
           >
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button
             type="button"
@@ -242,7 +256,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
             disabled={deleting}
             className="text-danger hover:bg-danger/10"
           >
-            Excluir transação
+            {t('transactions.delete')}
           </Button>
         </div>
       </form>

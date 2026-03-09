@@ -137,38 +137,45 @@ function TransactionsPage() {
 
         <section>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-1">
-            Transações
+            {t('transactions.title')}
           </h2>
           <div className="space-y-2">
-        {filteredTransactions.length > 0 ? (
-          filteredTransactions.map((transaction) => {
-            const isManual = transaction.source !== 'rule';
-            return (
-              <TransactionCard
-                key={transaction.id}
-                {...transaction}
-                onEdit={
-                  isManual
-                    ? () => router.push(`/transactions/${transaction.id}/edit`)
-                    : undefined
-                }
-                onDelete={
-                  isManual
-                    ? () => {
-                        if (confirm('Excluir esta transação?')) {
-                          removeTransaction(transaction.id);
-                        }
-                      }
-                    : undefined
-                }
-              />
-            );
-          })
-        ) : (
-          <div className="rounded-xl border border-border border-dashed bg-card/50 px-6 py-12 text-center">
-            <p className="text-muted-foreground">Não há transações</p>
-          </div>
-        )}
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.map((transaction) => {
+                const isManual = transaction.source !== 'rule';
+                return (
+                  <TransactionCard
+                    key={transaction.id}
+                    {...transaction}
+                    onEdit={
+                      isManual
+                        ? () =>
+                            router.push(`/transactions/${transaction.id}/edit`)
+                        : undefined
+                    }
+                    onDelete={
+                      isManual
+                        ? () => {
+                            if (
+                              confirm(
+                                t('transactions.deleteTransactionConfirm'),
+                              )
+                            ) {
+                              removeTransaction(transaction.id);
+                            }
+                          }
+                        : undefined
+                    }
+                  />
+                );
+              })
+            ) : (
+              <div className="rounded-xl border border-border border-dashed bg-card/50 px-6 py-12 text-center">
+                <p className="text-muted-foreground">
+                  {t('transactions.noTransactionsFound')}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </div>

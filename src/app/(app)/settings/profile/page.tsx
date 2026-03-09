@@ -19,21 +19,6 @@ function ProfilePage() {
     phone: user?.phoneNumber ?? '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSave = () => {
-    // Mock save action
-    console.log('Saving profile:', formData);
-    router.push('/settings/profile');
-  };
-
-  console.log(user);
-
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-linear-to-b from-primary/10 to-transparent px-6 pt-8 pb-6">

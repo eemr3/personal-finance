@@ -4,7 +4,13 @@ import { Button } from '@/components/Button';
 import { Input, Select, TextArea } from '@/components/Input';
 import { usePeriod } from '@/contexts/PeriodContext';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import {
+  EXPENSE_CATEGORIES,
+  FIXED_EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
+} from '@/lib/categories';
 import { getPeriodRange } from '@/lib/period';
+import type { CategoryOption } from '@/types/categories';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -37,32 +43,26 @@ export function NewTransactionPage() {
     setFormData((prev) => (prev.date ? prev : { ...prev, date: start }));
   }, [period.month, period.year]);
 
-  const incomeCategories = [
-    { value: 'salary', label: t('transactions.salary') },
-    { value: 'freelance', label: t('transactions.freelance') },
-    { value: 'investment', label: t('transactions.investment') },
-    { value: 'business', label: t('transactions.business') },
-    { value: 'other', label: t('transactions.otherIncome') },
-  ];
+  const categories: CategoryOption[] =
+    transactionType === 'income'
+      ? INCOME_CATEGORIES.map((key) => ({
+          value: key,
+          label: t(`transactions.categoriesIncome.${key}`),
+        }))
+      : transactionType === 'expense'
+        ? EXPENSE_CATEGORIES.map((key) => ({
+            value: key,
+            label: t(`transactions.categoriesExpense.${key}`),
+          }))
+        : FIXED_EXPENSE_CATEGORIES.map((key) => ({
+            value: key,
+            label: t(`transactions.categoriesFixedExpense.${key}`),
+          }));
 
-  const expenseCategories = [
-    { value: 'cartão_de_crédito', label: t('transactions.creditCard') },
-    { value: 'supermercado', label: t('transactions.supermarket') },
-    { value: 'alimentacao', label: t('transactions.food') },
-    { value: 'informática', label: t('transactions.computer') },
-    { value: 'transporte', label: t('transactions.transport') },
-    { value: 'saúde', label: t('transactions.health') },
-    { value: 'educação', label: t('transactions.education') },
-    { value: 'entretenimento', label: t('transactions.entertainment') },
-    { value: 'outros', label: t('transactions.other') },
-  ];
-
-  const categories =
-    transactionType === 'income' ? incomeCategories : expenseCategories;
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     const date = formData.date || new Date().toISOString().split('T')[0];
+
     await addTransaction({
       ...formData,
       date,
@@ -118,15 +118,15 @@ export function NewTransactionPage() {
         <div>
           <Input
             label={t('transactions.name')}
-          placeholder={
-            transactionType === 'expense'
-              ? `${t('transactions.namePlaceholderExpense')}`
-              : `${t('transactions.namePlaceholderIncome')}`
-          }
-          value={formData.name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
+            placeholder={
+              transactionType === 'expense'
+                ? `${t('transactions.namePlaceholderExpense')}`
+                : `${t('transactions.namePlaceholderIncome')}`
+            }
+            value={formData.name}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
             required
           />
         </div>
@@ -154,11 +154,7 @@ export function NewTransactionPage() {
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
-              className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-2xl ${
-                currencyInputConfig.position === 'prefix'
-                  ? 'pl-10 pr-4'
-                  : 'pl-4 pr-10'
-              }`}
+              className={`w-full py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-2xl ${currencyInputConfig.inputPlClass} ${currencyInputConfig.inputPrClass}`}
               required
             />
           </div>
@@ -167,11 +163,11 @@ export function NewTransactionPage() {
         <div>
           <Select
             label={t('transactions.category')}
-          options={categories}
-          value={formData.category}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setFormData({ ...formData, category: e.target.value })
-          }
+            options={categories}
+            value={formData.category}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setFormData({ ...formData, category: e.target.value })
+            }
             required
           />
         </div>
@@ -180,10 +176,10 @@ export function NewTransactionPage() {
           <Input
             type="date"
             label={t('transactions.date')}
-          value={formData.date}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setFormData({ ...formData, date: e.target.value })
-          }
+            value={formData.date}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
             required
           />
         </div>
@@ -191,12 +187,12 @@ export function NewTransactionPage() {
         <div>
           <TextArea
             label={t('transactions.notes')}
-          placeholder={
-            transactionType === 'expense'
-              ? `${t('transactions.notesPlaceholderExpense')}`
-              : `${t('transactions.notesPlaceholderIncome')}`
-          }
-          value={formData.notes}
+            placeholder={
+              transactionType === 'expense'
+                ? `${t('transactions.notesPlaceholderExpense')}`
+                : `${t('transactions.notesPlaceholderIncome')}`
+            }
+            value={formData.notes}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setFormData({ ...formData, notes: e.target.value })
             }

@@ -17,9 +17,7 @@ export function Input({
 
   return (
     <div className={`flex flex-col gap-2 ${widthStyle}`}>
-      {label && (
-        <label className="text-sm text-foreground">{label}</label>
-      )}
+      {label && <label className="text-sm text-foreground">{label}</label>}
       <input
         className={`px-4 py-3 bg-input-background text-foreground placeholder:text-muted-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all ${widthStyle} ${className}`}
         {...props}
@@ -46,9 +44,7 @@ export function TextArea({
 
   return (
     <div className={`flex flex-col gap-2 ${widthStyle}`}>
-      {label && (
-        <label className="text-sm text-foreground">{label}</label>
-      )}
+      {label && <label className="text-sm text-foreground">{label}</label>}
       <textarea
         className={`px-4 py-3 bg-input-background text-foreground placeholder:text-muted-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all min-h-[100px] resize-y ${widthStyle} ${className}`}
         {...props}
@@ -77,9 +73,7 @@ export function Select({
 
   return (
     <div className={`flex flex-col gap-2 ${widthStyle}`}>
-      {label && (
-        <label className="text-sm text-foreground">{label}</label>
-      )}
+      {label && <label className="text-sm text-foreground">{label}</label>}
       <select
         className={`px-4 py-3 bg-input-background text-foreground border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all appearance-none ${widthStyle} ${className}`}
         {...props}

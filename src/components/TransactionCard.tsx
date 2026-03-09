@@ -1,28 +1,23 @@
 'use client';
 
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import React from 'react';
-import {
-  ArrowUpRight,
-  ArrowDownRight,
-  MoreVertical,
-  Pencil,
-  Trash2,
-} from 'lucide-react';
 
-import { useFormatCurrency } from '@/hooks/useFormatCurrency';
-import { useFormatDate } from '@/hooks/useFormatDate';
-import { formatCategoryLabel } from '@/lib/categories';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { useFormatDate } from '@/hooks/useFormatDate';
 import { useTranslation } from 'react-i18next';
+import { getCategoryLabel } from '@/lib/categories';
+import { CategoryIcon } from './CategoryIcon';
 
 interface TransactionCardProps {
   id: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'fixed';
   name: string;
   amount: number;
   category?: string | null;
@@ -52,6 +47,8 @@ export function TransactionCard({
   const amountColor = isIncome ? 'text-success' : 'text-danger';
   const canEdit = source !== 'rule' && (onEdit || onDelete);
   const { t } = useTranslation();
+  /** Transações de regra (despesa fixa) usam categorias de categoriesFixedExpense */
+  const categoryTypeForLabel = source === 'rule' ? 'fixed' : type;
 
   return (
     <div
@@ -61,18 +58,18 @@ export function TransactionCard({
       <div
         className={`w-12 h-12 rounded-full flex items-center justify-center ${isIncome ? 'bg-success/10' : 'bg-danger/10'}`}
       >
-        {icon ||
-          (isIncome ? (
-            <ArrowDownRight className="text-success" size={24} />
-          ) : (
-            <ArrowUpRight className="text-danger" size={24} />
-          ))}
+        {icon || (
+          <CategoryIcon
+            category={category ?? 'other'}
+            className={`${type === 'income' ? 'text-success' : 'text-danger'}`}
+          />
+        )}
       </div>
 
       <div className="flex-1 min-w-0">
         <h4 className="truncate">{name}</h4>
         <p className="text-sm text-muted-foreground">
-          {formatCategoryLabel(category ?? '')}
+          {category ? getCategoryLabel(category, categoryTypeForLabel, t) : ''}
         </p>
       </div>
 
@@ -109,7 +106,7 @@ export function TransactionCard({
                   }}
                 >
                   <Pencil size={16} className="mr-2" />
-                  Editar
+                  {t('transactions.edit')}
                 </DropdownMenuItem>
               )}
               {onDelete && (
@@ -121,7 +118,7 @@ export function TransactionCard({
                   className="text-danger"
                 >
                   <Trash2 size={16} className="mr-2" />
-                  Excluir
+                  {t('transactions.delete')}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
