@@ -53,51 +53,49 @@ export function TransactionCard({
 
   return (
     <div
-      className="flex items-center justify-between p-4 rounded-2xl bg-card border border-white/5 hover:bg-white/[0.02] transition-colors group cursor-pointer"
+      className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-card border border-white/5 hover:bg-white/2 transition-colors cursor-pointer min-w-0"
       onClick={onClick}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 min-w-0 flex-1 overflow-hidden">
         <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner border ${
+          className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center shadow-inner border ${
             isIncome
               ? 'bg-primary/10 text-primary border-primary/20'
               : 'bg-danger/10 text-danger border-danger/20'
           }`}
         >
-        {icon || (
-          <CategoryIcon
-            category={category ?? 'other'}
-            className={isIncome ? 'text-primary' : 'text-danger'}
-          />
-        )}
+          {icon || (
+            <CategoryIcon
+              category={category ?? 'other'}
+              className={isIncome ? 'text-primary' : 'text-danger'}
+            />
+          )}
         </div>
-        <div>
+        <div className="min-w-0">
           <h4 className="font-medium text-foreground text-base mb-0.5 truncate">
             {name}
           </h4>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
             <span>{formatDate(date)}</span>
-            {category && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                <span className="truncate max-w-[100px]">
-                  {getCategoryLabel(category, categoryTypeForLabel, t)}
-                  {paymentMethod &&
-                    ` · ${t(`transactions.paymentMethods.${paymentMethod}`)}`}
-                </span>
-              </>
-            )}
-            {source === 'rule' && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                <span>({t('settings.fixedExpenseRules.rule')})</span>
-              </>
+            {(category || paymentMethod || source === 'rule') && (
+              <span className="truncate max-w-[140px]">
+                {[
+                  category &&
+                    getCategoryLabel(category, categoryTypeForLabel, t),
+                  paymentMethod &&
+                    t(`transactions.paymentMethodsShort.${paymentMethod}`),
+                  source === 'rule' &&
+                    `(${t('settings.fixedExpenseRules.rule')})`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 shrink-0">
         <div className="text-right">
           <span
             className={`font-bold text-[15px] flex items-center gap-1 ${
@@ -113,14 +111,17 @@ export function TransactionCard({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center justify-center rounded-lg"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 flex items-center justify-center rounded-lg"
                 onClick={(e) => e.stopPropagation()}
                 aria-label="Ações"
               >
                 <MoreVertical size={20} />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card border-white/10">
+            <DropdownMenuContent
+              align="end"
+              className="bg-card border-white/10"
+            >
               {onEdit && (
                 <DropdownMenuItem
                   onClick={(e) => {

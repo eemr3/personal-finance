@@ -30,13 +30,10 @@ export function BottomNav() {
               key={item.path}
               href={item.path}
               className={clsx(
-                'flex flex-col items-center gap-1.5 transition-all duration-300 relative',
+                'flex flex-col items-center gap-1.5 transition-all duration-300',
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {isActive && (
-                <div className="absolute -top-4 w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_2px_hsl(173_80%_40%_/_0.8)]" />
-              )}
               <Icon
                 strokeWidth={isActive ? 2.5 : 2}
                 className={clsx(

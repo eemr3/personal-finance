@@ -88,6 +88,14 @@
     "paymentMethods": {
       "credit_personal": "Personal credit card",
       "credit_business": "Business credit card",
+      "debit": "Debit card",
+      "pix": "Pix",
+      "cash": "Cash"
+    },
+    "paymentMethodsShort": {
+      "credit_personal": "Credit",
+      "credit_business": "Bus. credit",
+      "debit": "Debit",
       "pix": "Pix",
       "cash": "Cash"
     }

@@ -88,6 +88,14 @@
     "paymentMethods": {
       "credit_personal": "Tarjeta de crédito personal",
       "credit_business": "Tarjeta de crédito empresarial",
+      "debit": "Tarjeta de débito",
+      "pix": "Pix",
+      "cash": "Efectivo"
+    },
+    "paymentMethodsShort": {
+      "credit_personal": "Crédito",
+      "credit_business": "Créd. empresarial",
+      "debit": "Débito",
       "pix": "Pix",
       "cash": "Efectivo"
     }

@@ -4,6 +4,7 @@ export type TransactionType = 'income' | 'expense';
 export type PaymentMethod =
   | 'credit_personal'
   | 'credit_business'
+  | 'debit'
   | 'pix'
   | 'cash';
 
