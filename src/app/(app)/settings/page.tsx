@@ -162,9 +162,7 @@ function SettingsPage() {
               <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
                 <CreditCard className="w-5 h-5 text-primary" />
               </div>
-              <Label className="text-base font-medium">
-                {t('settings.currency')}
-              </Label>
+              <Label className="text-base font-medium">{t('settings.currency')}</Label>
             </div>
             <Select
               value={currency}
@@ -189,9 +187,7 @@ function SettingsPage() {
               <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
                 <Globe className="w-5 h-5 text-primary" />
               </div>
-              <Label className="text-base font-medium">
-                {t('settings.language')}
-              </Label>
+              <Label className="text-base font-medium">{t('settings.language')}</Label>
             </div>
             <Select
               value={language}
@@ -216,9 +212,7 @@ function SettingsPage() {
               <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
                 <Moon className="w-5 h-5 text-primary" />
               </div>
-              <Label className="text-base font-medium">
-                {t('settings.theme')}
-              </Label>
+              <Label className="text-base font-medium">{t('settings.theme')}</Label>
             </div>
             <Select value={currentTheme} onValueChange={(v) => setTheme(v)}>
               <SelectTrigger className="w-28 bg-transparent border-none focus:ring-0 h-auto py-0 min-h-0">
@@ -263,8 +257,8 @@ function SettingsPage() {
                 <div>
                   <h4 className="font-medium">{rule.name}</h4>
                   <p className="text-xs text-muted-foreground capitalize">
-                    {rule.amountType === 'percentage' ? 'Percentage' : 'Fixed'}{' '}
-                    • {getCategoryLabel(rule.category, 'fixed', t)}
+                    {rule.amountType === 'percentage' ? 'Percentage' : 'Fixed'} •{' '}
+                    {getCategoryLabel(rule.category, 'fixed', t)}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -272,8 +266,7 @@ function SettingsPage() {
                     {rule.amountType === 'percentage'
                       ? `${rule.amount}%`
                       : formatCurrency(
-                          parseFloat(String(rule.amount).replace(',', '.')) ||
-                            0,
+                          parseFloat(String(rule.amount).replace(',', '.')) || 0,
                         )}
                   </span>
                   <DropdownMenu>
@@ -286,10 +279,7 @@ function SettingsPage() {
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="bg-card border-white/10"
-                    >
+                    <DropdownMenuContent align="end" className="bg-card border-white/10">
                       <DropdownMenuItem
                         onClick={() => handleEditRule(rule as RuleForEdit)}
                       >

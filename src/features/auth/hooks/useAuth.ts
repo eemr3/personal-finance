@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, getRedirectResult, User } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult, User, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase-client';
 
 export function useAuth() {
@@ -17,6 +17,10 @@ export function useAuth() {
 
     return () => unsubscribe();
   }, []);
+
+  async function logout() {
+    await signOut(auth);
+  }
   // useEffect(() => {
   //   async function initAuth() {
   //     try {
@@ -41,5 +45,5 @@ export function useAuth() {
   //   initAuth();
   // }, []);
 
-  return { user, loading };
+  return { user, loading, logout };
 }
