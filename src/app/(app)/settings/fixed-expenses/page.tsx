@@ -12,7 +12,12 @@ import { FIXED_EXPENSE_CATEGORIES } from '@/lib/categories';
 import { BottomNav } from '../../../../components/BottomNav';
 import { useTranslation } from 'react-i18next';
 
-type ConditionType = 'always' | 'income_above' | 'day_of_month' | 'custom';
+type ConditionType =
+  | 'always'
+  | 'income_above'
+  | 'day_of_month'
+  | 'automatic'
+  | 'custom';
 
 /** Interpreta valor numérico da condição: aceita "3776.05", "3776,05" ou "3.776,05". */
 function parseConditionAmount(value: string): number {
@@ -48,6 +53,8 @@ function buildConditionString(
       return day
         ? t('fixedExpenses.rules.conditionDayOfMonthValue', { day })
         : always;
+    case 'automatic':
+      return t('fixedExpenses.rules.conditionAutomatic');
     case 'custom':
       return custom.trim() || always;
     default:
@@ -57,33 +64,51 @@ function buildConditionString(
 
 const SUPPORTED_LANGS = ['pt', 'en', 'es'] as const;
 
-function getAlwaysStrings(i18n: { getResourceBundle: (lng: string, ns: string) => unknown }): string[] {
+function getAlwaysStrings(i18n: {
+  getResourceBundle: (lng: string, ns: string) => unknown;
+}): string[] {
   const strings: string[] = [];
   for (const lng of SUPPORTED_LANGS) {
-    const bundle = i18n.getResourceBundle(lng, 'translation') as Record<string, unknown> | undefined;
-    const always = (bundle?.fixedExpenses as Record<string, unknown>)?.rules as Record<string, unknown>;
+    const bundle = i18n.getResourceBundle(lng, 'translation') as
+      | Record<string, unknown>
+      | undefined;
+    const always = (bundle?.fixedExpenses as Record<string, unknown>)
+      ?.rules as Record<string, unknown>;
     const val = always?.conditionAlways;
-    if (typeof val === 'string' && val.trim()) strings.push(val.trim().toLowerCase());
+    if (typeof val === 'string' && val.trim())
+      strings.push(val.trim().toLowerCase());
   }
   return [...new Set(strings)];
 }
 
-function getIncomeKeywords(i18n: { getResourceBundle: (lng: string, ns: string) => unknown }): string[] {
+function getIncomeKeywords(i18n: {
+  getResourceBundle: (lng: string, ns: string) => unknown;
+}): string[] {
   const keywords: string[] = [];
   for (const lng of SUPPORTED_LANGS) {
-    const bundle = i18n.getResourceBundle(lng, 'translation') as Record<string, unknown> | undefined;
-    const val = (bundle?.fixedExpenses as Record<string, unknown>)?.conditionIncomeAboveContains;
-    if (typeof val === 'string' && val.trim()) keywords.push(val.trim().toLowerCase());
+    const bundle = i18n.getResourceBundle(lng, 'translation') as
+      | Record<string, unknown>
+      | undefined;
+    const val = (bundle?.fixedExpenses as Record<string, unknown>)
+      ?.conditionIncomeAboveContains;
+    if (typeof val === 'string' && val.trim())
+      keywords.push(val.trim().toLowerCase());
   }
   return [...new Set(keywords)];
 }
 
-function getDayKeywords(i18n: { getResourceBundle: (lng: string, ns: string) => unknown }): string[] {
+function getDayKeywords(i18n: {
+  getResourceBundle: (lng: string, ns: string) => unknown;
+}): string[] {
   const keywords: string[] = [];
   for (const lng of SUPPORTED_LANGS) {
-    const bundle = i18n.getResourceBundle(lng, 'translation') as Record<string, unknown> | undefined;
-    const val = (bundle?.fixedExpenses as Record<string, unknown>)?.conditionDayOfMonthContains;
-    if (typeof val === 'string' && val.trim()) keywords.push(val.trim().toLowerCase());
+    const bundle = i18n.getResourceBundle(lng, 'translation') as
+      | Record<string, unknown>
+      | undefined;
+    const val = (bundle?.fixedExpenses as Record<string, unknown>)
+      ?.conditionDayOfMonthContains;
+    if (typeof val === 'string' && val.trim())
+      keywords.push(val.trim().toLowerCase());
   }
   return [...new Set(keywords)];
 }
@@ -113,7 +138,8 @@ function parseConditionMultilingual(
       .replace(/[^\d,.]/g, '')
       .replace(',', '.')
       .replace(/\.(?=.*\.)/g, '');
-    if (num) return { type: 'income_above', incomeMin: num, day: '', custom: '' };
+    if (num)
+      return { type: 'income_above', incomeMin: num, day: '', custom: '' };
   }
 
   const dayKeywords = getDayKeywords(i18n);
@@ -160,7 +186,9 @@ function parseCondition(
   if (!c || lower.includes(always)) {
     return { type: 'always', incomeMin: '', day: '', custom: '' };
   }
-  const incomeKeyword = t('fixedExpenses.conditionIncomeAboveContains').toLowerCase();
+  const incomeKeyword = t(
+    'fixedExpenses.conditionIncomeAboveContains',
+  ).toLowerCase();
   if (lower.includes(incomeKeyword)) {
     const num = c
       .replace(/[^\d,.]/g, '')
@@ -169,7 +197,9 @@ function parseCondition(
     if (num)
       return { type: 'income_above', incomeMin: num, day: '', custom: '' };
   }
-  const dayKeyword = t('fixedExpenses.conditionDayOfMonthContains').toLowerCase();
+  const dayKeyword = t(
+    'fixedExpenses.conditionDayOfMonthContains',
+  ).toLowerCase();
   if (lower.includes(dayKeyword)) {
     const dayMatch = c.match(/\b(\d{1,2})\b/);
     const d = dayMatch?.[1]?.trim() ?? '';
@@ -215,10 +245,26 @@ function FixedExpensesPage() {
 
   const conditionTypeOptions = useMemo(
     () => [
-      { value: 'always' as const, label: t('fixedExpenses.rules.conditionAlways') },
-      { value: 'income_above' as const, label: t('fixedExpenses.rules.conditionIncomeAbove') },
-      { value: 'day_of_month' as const, label: t('fixedExpenses.rules.conditionDayOfMonth') },
-      { value: 'custom' as const, label: t('fixedExpenses.rules.conditionCustom') },
+      {
+        value: 'always' as const,
+        label: t('fixedExpenses.rules.conditionAlways'),
+      },
+      {
+        value: 'income_above' as const,
+        label: t('fixedExpenses.rules.conditionIncomeAbove'),
+      },
+      {
+        value: 'day_of_month' as const,
+        label: t('fixedExpenses.rules.conditionDayOfMonth'),
+      },
+      {
+        value: 'automatic' as const,
+        label: t('fixedExpenses.rules.conditionAutomatic'),
+      },
+      {
+        value: 'custom' as const,
+        label: t('fixedExpenses.rules.conditionCustom'),
+      },
     ],
     [t],
   );
@@ -455,7 +501,9 @@ function FixedExpensesPage() {
                       type="number"
                       min="1"
                       max="31"
-                      placeholder={t('fixedExpenses.rules.conditionDayPlaceholder')}
+                      placeholder={t(
+                        'fixedExpenses.rules.conditionDayPlaceholder',
+                      )}
                       value={formData.conditionDay}
                       onChange={(e) =>
                         setFormData({
@@ -472,9 +520,12 @@ function FixedExpensesPage() {
                 {formData.conditionType === 'custom' && (
                   <input
                     type="text"
-                    placeholder={t('fixedExpenses.rules.conditionCustomPlaceholder', {
-                      value: formatCurrency(5000),
-                    })}
+                    placeholder={t(
+                      'fixedExpenses.rules.conditionCustomPlaceholder',
+                      {
+                        value: formatCurrency(5000),
+                      },
+                    )}
                     value={formData.conditionCustom}
                     onChange={(e) =>
                       setFormData({

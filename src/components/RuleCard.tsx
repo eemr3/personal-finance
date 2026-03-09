@@ -3,6 +3,7 @@ import { Card } from './Card';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { getCategoryLabel } from '@/lib/categories';
 import { useTranslation } from 'react-i18next';
+import { CategoryIcon } from './CategoryIcon';
 
 interface RuleCardProps {
   id: string;
@@ -35,10 +36,18 @@ export function RuleCard({
       : amount.includes('%')
         ? amount
         : `${amount}%`;
+  const categoryKey = (category || 'other').trim().toLowerCase();
 
   return (
     <Card className="relative border border-border rounded-xl hover:bg-accent/50 hover:border-border transition-all duration-200 ease-out">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start gap-4">
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-primary/10 text-primary"
+          aria-hidden
+        >
+          <CategoryIcon category={categoryKey} className="size-6" />
+        </div>
+
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-foreground mb-1 truncate">{name}</h4>
           <p className="text-sm text-muted-foreground mb-2">{condition}</p>

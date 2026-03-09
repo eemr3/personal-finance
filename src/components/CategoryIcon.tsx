@@ -10,14 +10,18 @@ import {
   HandCoins,
   Heart,
   Home as HomeIcon,
+  Landmark,
   LucideIcon,
   Package,
+  Shield,
   ShoppingBag,
   ShoppingCart,
   Smartphone,
   Sparkles,
   TrendingUp,
   Utensils,
+  Wallet,
+  Zap,
 } from 'lucide-react';
 
 export const categoryIcons: Record<string, LucideIcon> = {
@@ -40,6 +44,10 @@ export const categoryIcons: Record<string, LucideIcon> = {
   supermarket: ShoppingCart,
   home_supplies: BrushCleaning,
   home_cleaning: Sparkles,
+  utilities: Zap,
+  insurance: Shield,
+  debt: Wallet,
+  savings: Landmark,
 };
 
 export const categoryLabels: Record<string, string> = {

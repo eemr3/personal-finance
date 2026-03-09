@@ -129,6 +129,7 @@
       "ruleNamePlaceholder": "e.g. Trybe payment",
       "condition": "Condition",
       "conditionAlways": "Always apply",
+      "conditionAutomatic": "Automatic",
       "conditionIncomeAbove": "When income is greater than",
       "conditionDayOfMonth": "Every month on day",
       "conditionCustom": "Other (describe)",

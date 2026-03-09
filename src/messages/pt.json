@@ -139,6 +139,7 @@
       "ruleNamePlaceholder": "ex.: Pagamento Trybe",
       "condition": "Condição",
       "conditionAlways": "Sempre aplicar",
+      "conditionAutomatic": "Automático",
       "conditionIncomeAbove": "Quando receita for maior que",
       "conditionDayOfMonth": "Todo mês no dia",
       "conditionCustom": "Outra (descreva)",
