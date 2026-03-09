@@ -3,10 +3,14 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.finwise.app',
   appName: 'FinWise',
-  server: {
+  webDir: 'out',
+  // Remova a propriedade 'server' para produção ou comente-a
+  /* server: {
     url: 'https://finwise-io.vercel.app',
-    cleartext: true,
+    cleartext: false,
+  }, */
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
   },
 };
-
-export default config;

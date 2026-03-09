@@ -9,7 +9,7 @@ import { auth } from '@/lib/firebase/firebase-client';
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
 
-  if (window.location.hostname === 'localhost') {
+  if (typeof window !== 'undefined') {
     await signInWithPopup(auth, provider);
   } else {
     await signInWithRedirect(auth, provider);

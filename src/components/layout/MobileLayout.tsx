@@ -12,10 +12,7 @@ interface MobileLayoutProps {
 export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
   const pathname = usePathname();
   const isEditPage = /^\/transactions\/[^/]+\/edit$/.test(pathname);
-  const shouldHideNav =
-    hideNav ||
-    pathname === '/transactions/new' ||
-    isEditPage;
+  const shouldHideNav = hideNav || pathname === '/transactions/new' || isEditPage;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex justify-center">
