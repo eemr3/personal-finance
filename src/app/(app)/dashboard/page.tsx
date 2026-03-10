@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { ArrowDownRight, ArrowUpRight, Bell, Wallet } from 'lucide-react';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
@@ -34,6 +35,10 @@ function getMonthKey(t: {
 function DashboardPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
+    null
+  );
   const { formatCurrency, currency } = useFormatCurrency();
   const { user, loading } = useAuth();
   const {
@@ -322,11 +327,8 @@ function DashboardPage() {
                 onDelete={
                   tx.source !== 'rule' && tx.id
                     ? () => {
-                        if (
-                          confirm(t('transactions.deleteTransactionConfirm'))
-                        ) {
-                          removeTransaction(tx.id);
-                        }
+                        setTransactionToDelete(tx.id);
+                        setDeleteConfirmOpen(true);
                       }
                     : undefined
                 }
@@ -339,6 +341,20 @@ function DashboardPage() {
           )}
         </div>
       </section>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title={t('common.confirmDelete')}
+        description={t('transactions.deleteTransactionConfirm')}
+        onConfirm={() => {
+          if (transactionToDelete) {
+            removeTransaction(transactionToDelete);
+            setTransactionToDelete(null);
+          }
+        }}
+        variant="destructive"
+      />
     </div>
   );
 }

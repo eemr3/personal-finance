@@ -6,6 +6,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+
 import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
@@ -31,6 +33,10 @@ function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
     'all'
+  );
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
+    null
   );
 
   const filteredTransactions = useMemo(() => {
@@ -153,11 +159,8 @@ function TransactionsPage() {
                 onDelete={
                   isManual && transaction.id
                     ? () => {
-                        if (
-                          confirm(t('transactions.deleteTransactionConfirm'))
-                        ) {
-                          removeTransaction(transaction.id);
-                        }
+                        setTransactionToDelete(transaction.id);
+                        setDeleteConfirmOpen(true);
                       }
                     : undefined
                 }
@@ -170,6 +173,20 @@ function TransactionsPage() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title={t('common.confirmDelete')}
+        description={t('transactions.deleteTransactionConfirm')}
+        onConfirm={() => {
+          if (transactionToDelete) {
+            removeTransaction(transactionToDelete);
+            setTransactionToDelete(null);
+          }
+        }}
+        variant="destructive"
+      />
     </div>
   );
 }

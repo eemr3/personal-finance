@@ -8,7 +8,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "actions": "Actions",
-    "close": "Close"
+    "close": "Close",
+    "confirmDelete": "Confirm deletion"
   },
   "dashboard": {
     "title": "Dashboard",

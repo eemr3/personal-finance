@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useState, useEffect, useMemo } from 'react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { Input, TextArea, Select } from '@/components/Input';
@@ -34,6 +35,7 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
     notes: '',
   });
   const [deleting, setDeleting] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const transaction = transactions.find((t) => t.id === id);
 
@@ -105,9 +107,13 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm(t('transactions.deleteTransactionConfirm'))) return;
+    setDeleteConfirmOpen(true);
+  };
+
+  const executeDelete = async () => {
     setDeleting(true);
     await removeTransaction(id);
+    setDeleteConfirmOpen(false);
     router.push('/transactions');
   };
 
@@ -282,6 +288,16 @@ export function EditTransactionPage({ id }: EditTransactionPageProps) {
           </Button>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title={t('common.confirmDelete')}
+        description={t('transactions.deleteTransactionConfirm')}
+        onConfirm={executeDelete}
+        variant="destructive"
+        loading={deleting}
+      />
     </div>
   );
 }

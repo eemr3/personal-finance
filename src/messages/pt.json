@@ -9,7 +9,8 @@
     "edit": "Editar",
     "return": "Voltar",
     "actions": "Ações",
-    "close": "Fechar"
+    "close": "Fechar",
+    "confirmDelete": "Confirmar exclusão"
   },
   "login": {
     "title": "Finanças Pessoais",

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { ArrowDownRight, CreditCard } from 'lucide-react';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useCardSpendingByMonth } from '@/features/transactions/hooks/useCardSpendingByMonth';
@@ -48,6 +49,10 @@ export default function CardsPage() {
     useCardSpendingByMonth();
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
+    null
+  );
   const hasCards = cards.length > 0;
   const selectedCard = hasCards ? cards[Math.min(selectedIndex, cards.length - 1)] : undefined;
 
@@ -227,11 +232,8 @@ export default function CardsPage() {
                     onDelete={
                       tx.source !== 'rule' && tx.id
                         ? () => {
-                            if (
-                              confirm(t('transactions.deleteTransactionConfirm'))
-                            ) {
-                              removeTransaction(tx.id);
-                            }
+                            setTransactionToDelete(tx.id);
+                            setDeleteConfirmOpen(true);
                           }
                         : undefined
                     }
@@ -242,6 +244,20 @@ export default function CardsPage() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title={t('common.confirmDelete')}
+        description={t('transactions.deleteTransactionConfirm')}
+        onConfirm={() => {
+          if (transactionToDelete) {
+            removeTransaction(transactionToDelete);
+            setTransactionToDelete(null);
+          }
+        }}
+        variant="destructive"
+      />
     </div>
   );
 }

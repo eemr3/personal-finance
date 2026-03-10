@@ -34,6 +34,7 @@ import { useAppearance } from '@/contexts/AppearanceContext';
 import { useTheme } from 'next-themes';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { getCategoryLabel } from '@/lib/categories';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { RuleFormModal, type RuleForEdit } from '@/components/RuleFormModal';
 import type {
   AppearanceCurrency,
@@ -76,6 +77,8 @@ function SettingsPage() {
 
   const [ruleModalOpen, setRuleModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<RuleForEdit | null>(null);
+  const [deleteRuleConfirmOpen, setDeleteRuleConfirmOpen] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
 
   const currentTheme = (theme ?? 'dark') as string;
 
@@ -105,9 +108,8 @@ function SettingsPage() {
   };
 
   const handleDeleteRule = (ruleId: string) => {
-    if (confirm(t('settings.deleteRuleConfirm'))) {
-      deleteRule(ruleId);
-    }
+    setRuleToDelete(ruleId);
+    setDeleteRuleConfirmOpen(true);
   };
 
   if (rulesLoading) {
@@ -351,6 +353,20 @@ function SettingsPage() {
         }}
         editingRule={editingRule}
         onSave={handleRuleSave}
+      />
+
+      <ConfirmDialog
+        open={deleteRuleConfirmOpen}
+        onOpenChange={setDeleteRuleConfirmOpen}
+        title={t('common.confirmDelete')}
+        description={t('settings.deleteRuleConfirm')}
+        onConfirm={() => {
+          if (ruleToDelete) {
+            deleteRule(ruleToDelete);
+            setRuleToDelete(null);
+          }
+        }}
+        variant="destructive"
       />
     </div>
   );
