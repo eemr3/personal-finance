@@ -221,7 +221,7 @@ export default function CardsPage() {
                     source={tx.source}
                     onEdit={
                       tx.source !== 'rule'
-                        ? () => router.push(`/transactions/${tx.id}/edit`)
+                        ? () => router.push(`/transactions/edit?id=${tx.id}`)
                         : undefined
                     }
                     onDelete={

@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
-import { ArrowDownRight, ArrowUpRight, Bell, Plus, Wallet } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Bell, Wallet } from 'lucide-react';
 
 import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -316,7 +316,7 @@ function DashboardPage() {
                 source={'source' in tx ? tx.source : undefined}
                 onEdit={
                   tx.source !== 'rule'
-                    ? () => router.push(`/transactions/${tx.id}/edit`)
+                    ? () => router.push(`/transactions/edit?id=${tx.id}`)
                     : undefined
                 }
                 onDelete={
@@ -339,16 +339,6 @@ function DashboardPage() {
           )}
         </div>
       </section>
-
-      {/* FAB */}
-      <button
-        type="button"
-        onClick={() => router.push('/transactions/new')}
-        className="fixed bottom-24 right-6 w-14 h-14 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-[0_8px_30px_hsl(173_80%_40%/0.5)] hover:scale-105 active:scale-95 transition-all z-40"
-        aria-label={t('transactions.newTransaction')}
-      >
-        <Plus className="w-6 h-6" strokeWidth={3} />
-      </button>
     </div>
   );
 }

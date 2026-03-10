@@ -147,7 +147,7 @@ function TransactionsPage() {
                 onEdit={
                   isManual
                     ? () =>
-                        router.push(`/transactions/${transaction.id}/edit`)
+                        router.push(`/transactions/edit?id=${transaction.id}`)
                     : undefined
                 }
                 onDelete={

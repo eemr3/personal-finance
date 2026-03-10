@@ -11,7 +11,7 @@ interface MobileLayoutProps {
 
 export function MobileLayout({ children, hideNav = false }: MobileLayoutProps) {
   const pathname = usePathname();
-  const isEditPage = /^\/transactions\/[^/]+\/edit$/.test(pathname);
+  const isEditPage = pathname === '/transactions/edit';
   const shouldHideNav = hideNav || pathname === '/transactions/new' || isEditPage;
 
   return (
