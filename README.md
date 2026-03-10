@@ -77,6 +77,25 @@ Opções:
 - **Manter export estático** e mover a IA para um backend separado (Cloud Functions, etc.), chamando via HTTP.
 - **Desativar `output: 'export'`** e fazer deploy em um ambiente com suporte a rotas server (serverless/Node).
 
+#### Erro comum em produção / PWA
+
+Se ao clicar em **“Gerar análise do mês”** você ver no console:
+
+- `POST /api/ai/month-summary 404 (Not Found)`
+- `Unexpected token '<', '<!DOCTYPE '... is not valid JSON`
+
+significa que o app está rodando como **site estático** e a rota de API não existe em produção.
+
+**Como corrigir (Vercel):**
+
+1. Abra `next.config.ts`.
+2. Remova ou comente a linha:
+   ```ts
+   output: 'export',
+   ```
+3. Faça um novo deploy no Vercel.
+4. Depois do deploy, a chamada para `/api/ai/month-summary` deve responder 200 e o erro some no PWA/produção.
+
 ## Scripts úteis
 
 - `npm run dev`: desenvolvimento

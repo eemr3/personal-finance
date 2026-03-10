@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "NEXT_STATIC_EXPORT=true next build",
     "start": "next start",
     "lint": "eslint",
     "cap:assets": "npx @capacitor/assets generate --iconBackgroundColor=#0d1413 --iconBackgroundColorDark=#0d1413 --splashBackgroundColor=#0d1413 --splashBackgroundColorDark=#0d1413 --android"
