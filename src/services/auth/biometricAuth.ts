@@ -1,7 +1,6 @@
 import { Capacitor } from '@capacitor/core';
-import { NativeBiometric } from '@capgo/capacitor-native-biometric';
-import { BiometricAuth } from '@aparajita/capacitor-biometric-auth';
 import { Preferences } from '@capacitor/preferences';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 const BIOMETRIC_SERVER = 'com.finwise.app';
 const BIOMETRIC_ENABLED_KEY = 'biometric_enabled';
@@ -42,9 +41,6 @@ export async function saveBiometricCredentials(
     value: JSON.stringify({ idToken, accessToken }),
   });
   await Preferences.set({ key: BIOMETRIC_ENABLED_KEY, value: 'true' });
-
-  const check = await Preferences.get({ key: BIOMETRIC_ENABLED_KEY });
-  console.log('Biometric preference saved:', check.value);
 }
 
 // Recuperar tokens salvos

@@ -26,16 +26,10 @@ export function useBiometric() {
   async function handleBiometricLogin(): Promise<boolean> {
     try {
       const { uid, email } = await loginWithBiometric();
-      console.log('Biometric ok, uid:', uid, 'email:', email);
-      // ✅ Se tiver token salvo, reautenticar silenciosamente
-      // Como o Firebase mantém sessão, só verificar se o usuário ainda está logado
       const currentUser = auth.currentUser;
-      console.log('Current Firebase user:', currentUser?.uid);
       if (currentUser && currentUser.uid === uid) {
-        console.log('Session active, redirecting...');
-        return true; // já está autenticado
+        return true;
       }
-      console.log('Session expired, redirecting anyway...');
       return true;
     } catch (error) {
       console.error('Biometric login failed:', error);

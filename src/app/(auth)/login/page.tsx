@@ -12,10 +12,8 @@ import { Capacitor } from '@capacitor/core';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-const DEFAULT_REDIRECT = '/dashboard.html';
 
 function LoginPageContent() {
   const router = useRouter();
@@ -29,35 +27,37 @@ function LoginPageContent() {
   const [pendingUser, setPendingUser] = useState<{ uid: string; email: string } | null>(
     null,
   );
-  const [redirectBlocked, setRedirectBlocked] = useState(false);
-  // Substituir o useEffect de redirect por:
-  const redirectBlockedRef = useRef(false); // ✅ useRef em vez de useState para evitar re-render
+  const redirectBlockedRef = useRef(false);
 
-  // Na tela de login, no useEffect de debug
-  useEffect(() => {
-    async function checkBiometric() {
-      const available = await isBiometricAvailable();
-      const enabled = await isBiometricEnabled();
-      console.log('=== BIOMETRIC DEBUG ===');
-      console.log('available:', available);
-      console.log('enabled:', enabled);
-      console.log('isNative:', Capacitor.isNativePlatform());
-      setBiometricAvailable(available);
-      setBiometricEnabled(enabled);
-    }
-    checkBiometric();
+  const checkBiometric = useCallback(async () => {
+    const available = await isBiometricAvailable();
+    const enabled = await isBiometricEnabled();
+    setBiometricAvailable(available);
+    setBiometricEnabled(enabled);
   }, []);
+
+  useEffect(() => {
+    checkBiometric();
+  }, [checkBiometric]);
 
   // Redirecionar se já logado
   useEffect(() => {
     if (user && !redirectBlockedRef.current) {
       if (Capacitor.isNativePlatform()) {
-        window.location.href = DEFAULT_REDIRECT;
+        window.location.href = '/dashboard.html';
       } else {
         router.replace('/dashboard');
       }
     }
   }, [user]);
+
+  function navigateToDashboard() {
+    if (Capacitor.isNativePlatform()) {
+      window.location.href = '/dashboard.html';
+    } else {
+      router.replace('/dashboard');
+    }
+  }
 
   async function handleGoogleLogin() {
     try {
@@ -74,7 +74,7 @@ function LoginPageContent() {
       }
 
       redirectBlockedRef.current = false;
-      window.location.href = DEFAULT_REDIRECT;
+      navigateToDashboard();
     } catch (error: any) {
       redirectBlockedRef.current = false;
       if (
@@ -89,8 +89,6 @@ function LoginPageContent() {
   async function handleBiometricLogin() {
     try {
       const credentials = await loginWithBiometric();
-      console.log('Biometric ok:', credentials.email);
-
       // ✅ Recuperar tokens e reautenticar no Firebase
       const tokens = await getBiometricTokens();
 
@@ -105,10 +103,9 @@ function LoginPageContent() {
           tokens.accessToken,
         );
         await signInWithCredential(auth, credential);
-        console.log('Firebase reauth ok!');
       }
 
-      window.location.href = DEFAULT_REDIRECT;
+      window.location.href = '/dashboard.html';
     } catch (error) {
       console.error('Biometric login failed:', error);
     }
@@ -125,13 +122,13 @@ function LoginPageContent() {
         idToken ?? '',
         accessToken ?? '',
       );
-      console.log('Biometric saved for:', pendingUser.email);
     }
 
     setShowBiometricModal(false);
     setPendingUser(null);
     redirectBlockedRef.current = false;
-    window.location.href = DEFAULT_REDIRECT;
+    await checkBiometric();
+    window.location.href = '/dashboard.html';
   }
 
   return (
