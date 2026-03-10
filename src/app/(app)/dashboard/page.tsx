@@ -20,6 +20,18 @@ import type { AiMonthInsight } from '@/lib/ai/gemini';
 
 const AI_INSIGHT_STORAGE_KEY = 'pf_ai_insight';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export function getApiUrl() {
+  if (typeof window === 'undefined') return '';
+
+  if (window.location.origin.includes('capacitor')) {
+    return API_URL;
+  }
+
+  return window.location.origin;
+}
+
 function getMonthKey(t: {
   date?: string;
   createdAt?: { toDate?: () => Date };
@@ -266,7 +278,7 @@ function DashboardPage() {
         locale,
       };
 
-      const response = await fetch('/api/ai/month-summary', {
+      const response = await fetch(`${getApiUrl()}/api/ai/month-summary`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -306,13 +318,12 @@ function DashboardPage() {
   };
 
   const monthName = useMemo(() => {
-    const lang =
-      (t as { i18n?: { language?: string } }).i18n?.language ?? 'pt';
+    const lang = (t as { i18n?: { language?: string } }).i18n?.language ?? 'pt';
     const localeStr = lang.startsWith('en')
       ? 'en-US'
       : lang.startsWith('es')
-        ? 'es-ES'
-        : 'pt-BR';
+      ? 'es-ES'
+      : 'pt-BR';
     return new Date(period.year, period.month - 1, 1).toLocaleDateString(
       localeStr,
       { month: 'long' },
