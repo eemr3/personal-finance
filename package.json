@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:static": "NEXT_STATIC_EXPORT=true next build",
+    "build:static": "cross-env NEXT_STATIC_EXPORT=true next build",
     "start": "next start",
     "lint": "eslint",
     "cap:assets": "npx @capacitor/assets generate --iconBackgroundColor=#0d1413 --iconBackgroundColorDark=#0d1413 --splashBackgroundColor=#0d1413 --splashBackgroundColorDark=#0d1413 --android"
@@ -75,6 +75,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",

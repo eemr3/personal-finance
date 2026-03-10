@@ -1,10 +1,13 @@
+import { Capacitor } from '@capacitor/core';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error('GEMINI_API_KEY is not set');
+function getGenAI() {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error('GEMINI_API_KEY is not set');
+  }
+  return new GoogleGenerativeAI(key);
 }
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 type FinancialMonthSummary = {
   monthLabel: string; // ex: "Março de 2026"
@@ -30,6 +33,7 @@ export async function generateMonthlyInsight(
   summary: FinancialMonthSummary,
   locale: 'pt' | 'en' | 'es' = 'pt',
 ) {
+  const genAI = getGenAI();
   const model = genAI.getGenerativeModel({
     model: 'gemini-2.5-flash',
   });
@@ -108,4 +112,11 @@ Remember: respond ONLY with a JSON object like:
       dica: '',
     };
   }
+}
+
+export function getApiUrl() {
+  if (Capacitor.isNativePlatform()) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  return window.location.origin;
 }

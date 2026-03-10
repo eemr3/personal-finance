@@ -1,56 +1,56 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { ArrowDownRight, ArrowUpRight, Bell, Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
-import { ArrowDownRight, ArrowUpRight, Bell, Wallet } from 'lucide-react';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { MonthlySummaryAccordion } from '@/components/MonthlySummaryAccordion';
 import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
+import { usePeriod } from '@/contexts/PeriodContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
-import { usePeriod } from '@/contexts/PeriodContext';
 import { getCategoryLabel } from '@/lib/categories';
 
-import type { AiMonthInsight } from '@/lib/ai/gemini';
+import { getApiUrl, type AiMonthInsight } from '@/lib/ai/gemini';
 
 const AI_INSIGHT_STORAGE_KEY = 'pf_ai_insight';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export function getApiUrl() {
-  if (typeof window === 'undefined') return '';
+// export function getApiUrl() {
+//   if (typeof window === 'undefined') return '';
 
-  if (window.location.origin.includes('capacitor')) {
-    return API_URL;
-  }
+//   if (window.location.origin.includes('capacitor')) {
+//     return API_URL;
+//   }
 
-  return window.location.origin;
-}
+//   return window.location.origin;
+// }
 
-function getMonthKey(t: {
-  date?: string;
-  createdAt?: { toDate?: () => Date };
-}): string {
-  if (typeof t.date === 'string') {
-    const ddmmyyyy = t.date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}`;
-    const iso = t.date.match(/^(\d{4})-(\d{2})/);
-    if (iso) return `${iso[1]}-${iso[2]}`;
-  }
-  const ts = t.createdAt as { toDate?: () => Date } | undefined;
-  if (ts?.toDate) {
-    const d = ts.toDate();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    return `${y}-${m}`;
-  }
-  return '';
-}
+// function getMonthKey(t: {
+//   date?: string;
+//   createdAt?: { toDate?: () => Date };
+// }): string {
+//   if (typeof t.date === 'string') {
+//     const ddmmyyyy = t.date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+//     if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}`;
+//     const iso = t.date.match(/^(\d{4})-(\d{2})/);
+//     if (iso) return `${iso[1]}-${iso[2]}`;
+//   }
+//   const ts = t.createdAt as { toDate?: () => Date } | undefined;
+//   if (ts?.toDate) {
+//     const d = ts.toDate();
+//     const y = d.getFullYear();
+//     const m = String(d.getMonth() + 1).padStart(2, '0');
+//     return `${y}-${m}`;
+//   }
+//   return '';
+// }
 
 function DashboardPage() {
   const router = useRouter();
@@ -73,6 +73,7 @@ function DashboardPage() {
     removeTransaction,
   } = useTransactionsWithRules();
 
+  console.log('user', user);
   const cacheKey = `${AI_INSIGHT_STORAGE_KEY}_${period.year}_${period.month}`;
 
   useEffect(() => {
