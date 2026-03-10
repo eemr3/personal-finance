@@ -1,19 +1,24 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { ArrowDownRight, ArrowUpRight, Bell, Wallet } from 'lucide-react';
 
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { MonthlySummaryAccordion } from '@/components/MonthlySummaryAccordion';
+import { MonthSelector } from '@/components/MonthSelector';
 import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { usePeriod } from '@/contexts/PeriodContext';
 import { getCategoryLabel } from '@/lib/categories';
 
 import type { AiMonthInsight } from '@/lib/ai/gemini';
+
+const AI_INSIGHT_STORAGE_KEY = 'pf_ai_insight';
 
 function getMonthKey(t: {
   date?: string;
@@ -38,6 +43,7 @@ function getMonthKey(t: {
 function DashboardPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { period, goToCurrentMonth, isCurrentMonth } = usePeriod();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
     null,
@@ -54,6 +60,36 @@ function DashboardPage() {
     loading: transactionsLoading,
     removeTransaction,
   } = useTransactionsWithRules();
+
+  const cacheKey = `${AI_INSIGHT_STORAGE_KEY}_${period.year}_${period.month}`;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (!raw || typeof raw !== 'string') {
+        setAiInsight(null);
+        return;
+      }
+      if (!raw.trim().startsWith('{')) {
+        setAiInsight(null);
+        return;
+      }
+      const parsed = JSON.parse(raw) as unknown;
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        'resumo' in parsed &&
+        typeof (parsed as AiMonthInsight).resumo === 'string'
+      ) {
+        setAiInsight(parsed as AiMonthInsight);
+      } else {
+        setAiInsight(null);
+      }
+    } catch {
+      setAiInsight(null);
+    }
+  }, [cacheKey]);
 
   const balance = totalIncome - totalExpenses;
   const currencyCode = (currency as string).toUpperCase();
@@ -103,6 +139,7 @@ function DashboardPage() {
   }, [allTransactionsForDisplay, totalExpenses, t]);
 
   const chartData = useMemo(() => {
+    const round2 = (n: number) => Math.round(n * 100) / 100;
     const byDay: Record<string, number> = {};
     let running = 0;
     const sorted = [...allTransactionsForDisplay].sort(
@@ -121,7 +158,7 @@ function DashboardPage() {
     for (const tx of sorted) {
       const amt = Number((tx as { amount?: number }).amount ?? 0);
       const type = String((tx as { type?: string }).type ?? '').toLowerCase();
-      running += type === 'income' ? amt : -amt;
+      running = round2(running + (type === 'income' ? amt : -amt));
       const d = (tx as { date?: string }).date;
       if (d) {
         const key =
@@ -134,18 +171,18 @@ function DashboardPage() {
     const keys = Object.keys(byDay).sort().slice(-7);
     if (keys.length === 0) {
       return [
-        { date: '1', balance: balance * 0.4 },
-        { date: '2', balance: balance * 0.6 },
-        { date: '3', balance: balance * 0.5 },
-        { date: '4', balance: balance * 0.8 },
-        { date: '5', balance: balance * 0.7 },
-        { date: '6', balance: balance * 0.9 },
-        { date: '7', balance },
+        { date: '1', balance: round2(balance * 0.4) },
+        { date: '2', balance: round2(balance * 0.6) },
+        { date: '3', balance: round2(balance * 0.5) },
+        { date: '4', balance: round2(balance * 0.8) },
+        { date: '5', balance: round2(balance * 0.7) },
+        { date: '6', balance: round2(balance * 0.9) },
+        { date: '7', balance: round2(balance) },
       ];
     }
     return keys.map((k) => ({
       date: k.slice(-2),
-      balance: byDay[k] ?? balance,
+      balance: round2(byDay[k] ?? balance),
     }));
   }, [allTransactionsForDisplay, balance]);
 
@@ -190,53 +227,98 @@ function DashboardPage() {
 
   const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
-  const handleGenerateAiInsight = async () => {
-    try {
-      setAiError(null);
-      setAiLoading(true);
+  const handleGenerateAiInsight = async (forceRefresh = false) => {
+    if (aiLoading) return;
+    setAiError(null);
+    setAiLoading(true);
+    if (forceRefresh) setAiInsight(null);
 
-      const lang = (t as any).i18n?.language || 'pt';
+    try {
+      const lang =
+        (t as { i18n?: { language?: string } }).i18n?.language ?? 'pt';
       const locale = lang.startsWith('en')
         ? 'en'
         : lang.startsWith('es')
         ? 'es'
         : 'pt';
 
-      const monthLabel = new Date().toLocaleDateString(
+      const monthLabel = new Date(
+        period.year,
+        period.month - 1,
+        1,
+      ).toLocaleDateString(
         locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR',
         { month: 'long', year: 'numeric' },
       );
 
+      const round2 = (n: number) => Math.round(n * 100) / 100;
+      const payload = {
+        monthLabel,
+        currency: currencyCode,
+        totalIncome: round2(totalIncome),
+        totalExpenses: round2(totalExpenses),
+        balance: round2(balance),
+        topCategories: topCategories.map((c) => ({
+          ...c,
+          amount: round2(c.amount),
+          percent: round2(c.percent),
+        })),
+        locale,
+      };
+
       const response = await fetch('/api/ai/month-summary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          monthLabel,
-          currency: currencyCode,
-          totalIncome,
-          totalExpenses,
-          balance,
-          topCategories,
-          locale,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao gerar análise do mês');
+        const errBody = await response.text();
+        let errMsg = 'Erro ao gerar análise';
+        try {
+          const errJson = JSON.parse(errBody) as { error?: string };
+          if (errJson?.error) errMsg = errJson.error;
+        } catch {
+          // ignore
+        }
+        throw new Error(errMsg);
       }
 
-      const data = await response.json();
-
-      const insight = data.insight as AiMonthInsight;
-
+      const data = (await response.json()) as { insight?: AiMonthInsight };
+      const insight = data.insight;
+      if (!insight || typeof insight.resumo !== 'string') {
+        throw new Error('Resposta inválida da API');
+      }
       setAiInsight(insight);
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(insight));
+      } catch {
+        // ignore storage errors
+      }
     } catch (error) {
       console.error(error);
-      setAiError('Não foi possível gerar a análise do mês. Tente novamente.');
+      setAiError(
+        error instanceof Error ? error.message : t('dashboard.aiError'),
+      );
     } finally {
       setAiLoading(false);
     }
   };
+
+  const monthName = useMemo(() => {
+    const lang =
+      (t as { i18n?: { language?: string } }).i18n?.language ?? 'pt';
+    const localeStr = lang.startsWith('en')
+      ? 'en-US'
+      : lang.startsWith('es')
+        ? 'es-ES'
+        : 'pt-BR';
+    return new Date(period.year, period.month - 1, 1).toLocaleDateString(
+      localeStr,
+      { month: 'long' },
+    );
+  }, [period.year, period.month, t]);
+
   return (
     <div className="p-6 space-y-8 pb-32">
       {/* Header */}
@@ -273,6 +355,20 @@ function DashboardPage() {
           <span className="absolute top-2.5 right-3 w-2 h-2 rounded-full bg-destructive" />
         </button>
       </header>
+
+      {/* Month selector: one line, doesn't compete with balance card */}
+      <section className="flex items-center justify-between gap-2">
+        <MonthSelector />
+        {!isCurrentMonth && (
+          <button
+            type="button"
+            onClick={goToCurrentMonth}
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            {t('dashboard.goToCurrentMonth')}
+          </button>
+        )}
+      </section>
 
       {/* Balance Card */}
       <section className="relative">
@@ -377,6 +473,7 @@ function DashboardPage() {
                 borderRadius: '12px',
               }}
               itemStyle={{ color: 'var(--foreground)' }}
+              formatter={(value) => formatCurrency(Number(value ?? 0))}
             />
             <Area
               type="monotone"
@@ -390,47 +487,46 @@ function DashboardPage() {
         </ResponsiveContainer>
       </section>
       {/* AI Monthly Insight */}
-      <section className="space-y-3">
-        <button
-          type="button"
-          onClick={handleGenerateAiInsight}
-          disabled={aiLoading || transactionsLoading}
-          className="w-full rounded-2xl border border-primary/40 bg-primary/10 text-primary px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors disabled:opacity-60"
-        >
-          {aiLoading ? 'Gerando análise do mês...' : 'Gerar análise do mês'}
-        </button>
+      <section className="space-y-3" aria-live="polite">
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => handleGenerateAiInsight(!!aiInsight)}
+            disabled={aiLoading || transactionsLoading}
+            className="flex-1 rounded-2xl border border-primary/40 bg-primary/10 text-primary px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors disabled:opacity-60"
+          >
+            {aiLoading
+              ? t('dashboard.aiGenerating')
+              : aiInsight
+              ? t('dashboard.aiGenerateAgain')
+              : t('dashboard.aiGenerate')}
+          </button>
+        </div>
         {aiError && <p className="text-xs text-destructive">{aiError}</p>}
-        {aiInsight && (
-          <div className="p-4 rounded-2xl bg-card border border-white/10 space-y-3">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Resumo do mês
-              </p>
-              <p className="text-sm text-foreground whitespace-pre-line">
-                {aiInsight.resumo}
-              </p>
-            </div>
-            {aiInsight.maiorGasto && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Maior gasto
-                </p>
-                <p className="text-sm text-foreground whitespace-pre-line">
-                  {aiInsight.maiorGasto}
-                </p>
-              </div>
-            )}
-            {aiInsight.dica && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Dica
-                </p>
-                <p className="text-sm text-foreground whitespace-pre-line">
-                  {aiInsight.dica}
-                </p>
-              </div>
-            )}
+        {aiLoading && (
+          <div className="p-4 rounded-2xl bg-card border border-white/10 space-y-3 animate-pulse">
+            <div className="h-4 w-2/3 rounded bg-white/10" />
+            <div className="h-4 w-full rounded bg-white/10" />
+            <div className="h-4 w-3/4 rounded bg-white/10" />
+            <div className="h-4 w-1/2 rounded bg-white/10" />
           </div>
+        )}
+        {!aiLoading && (
+          <MonthlySummaryAccordion
+            monthName={monthName}
+            currentYear={period.year}
+            monthlyIncome={totalIncome}
+            monthlyExpense={totalExpenses}
+            monthlyBalance={balance}
+            currency={currency}
+            resumo={aiInsight?.resumo}
+            maiorGasto={aiInsight?.maiorGasto}
+            dica={aiInsight?.dica}
+            labelMonthSummary={t('dashboard.aiMonthSummary')}
+            labelBiggestExpense={t('dashboard.aiBiggestExpense')}
+            labelTip={t('dashboard.aiTip')}
+            defaultOpen={!!aiInsight}
+          />
         )}
       </section>
       {/* Recent Transactions */}
