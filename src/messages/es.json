@@ -23,7 +23,16 @@
     "send": "Enviar",
     "recent": "Recientes",
     "viewAll": "Ver todas",
-    "noRecentTransactions": "Sin transacciones recientes"
+    "noRecentTransactions": "Sin transacciones recientes",
+    "goToCurrentMonth": "Mes actual",
+    "aiGenerate": "Generar análisis del mes",
+    "aiGenerating": "Generando análisis del mes...",
+    "aiMonthSummary": "Resumen del mes",
+    "aiBiggestExpense": "Mayor gasto",
+    "aiTip": "Consejo",
+    "aiGenerateAgain": "Generar de nuevo",
+    "aiClose": "Cerrar",
+    "aiError": "No se pudo generar el análisis. Inténtalo de nuevo."
   },
   "header": {
     "openMenu": "Abrir menú",
