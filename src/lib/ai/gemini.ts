@@ -20,7 +20,7 @@ type FinancialMonthSummary = {
   }>;
 };
 
-type AiMonthInsight = {
+export type AiMonthInsight = {
   resumo: string;
   maiorGasto: string;
   dica: string;
@@ -83,17 +83,22 @@ Remember: respond ONLY with a JSON object like:
 `;
 
   const result = await model.generateContent([systemPrompt, input]);
-  const text = result.response.text().trim();
+  let text = result.response.text().trim();
+
+  // Remove markdown code block se o modelo devolver ```json ... ```
+  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (jsonMatch) {
+    text = jsonMatch[1].trim();
+  }
 
   try {
-    const parsed = JSON.parse(text) as AiMonthInsight;
+    const parsed = JSON.parse(text) as Record<string, unknown>;
     return {
-      resumo: parsed.resumo ?? '',
-      maiorGasto: parsed.maiorGasto ?? '',
-      dica: parsed.dica ?? '',
+      resumo: String(parsed.resumo ?? parsed.summary ?? ''),
+      maiorGasto: String(parsed.maiorGasto ?? parsed.topSpending ?? ''),
+      dica: String(parsed.dica ?? parsed.tip ?? ''),
     };
   } catch {
-    // Fallback: se por algum motivo não vier JSON, devolve tudo em "resumo"
     return {
       resumo: text,
       maiorGasto: '',

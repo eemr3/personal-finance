@@ -11,6 +11,9 @@ import { TransactionCard } from '@/components/TransactionCard';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { getCategoryLabel } from '@/lib/categories';
+
+import type { AiMonthInsight } from '@/lib/ai/gemini';
 
 function getMonthKey(t: {
   date?: string;
@@ -37,8 +40,11 @@ function DashboardPage() {
   const { t } = useTranslation();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
-    null
+    null,
   );
+  const [aiInsight, setAiInsight] = useState<AiMonthInsight | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const { formatCurrency, currency } = useFormatCurrency();
   const { user, loading } = useAuth();
   const {
@@ -52,6 +58,50 @@ function DashboardPage() {
   const balance = totalIncome - totalExpenses;
   const currencyCode = (currency as string).toUpperCase();
 
+  const topCategories = useMemo(() => {
+    if (!totalExpenses) return [];
+    const totals: Record<
+      string,
+      { key: string; label: string; amount: number }
+    > = {};
+
+    for (const tx of allTransactionsForDisplay) {
+      const amt = Number((tx as { amount?: number }).amount ?? 0);
+      if (!amt) continue;
+
+      const type = String((tx as { type?: string }).type ?? '')
+        .toLocaleLowerCase()
+        .trim();
+
+      if (type !== 'expense' && type !== '') continue;
+
+      const cat = (tx as { category?: string }).category;
+      if (!cat) continue;
+
+      if (!totals[cat]) {
+        totals[cat] = {
+          key: cat,
+          label: getCategoryLabel(cat, 'expense', t),
+          amount: 0,
+        };
+      }
+      totals[cat].amount += amt;
+    }
+
+    const entries = Object.values(totals)
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 3);
+
+    if (entries.length === 0) return [];
+
+    return entries.map((e) => ({
+      key: e.key,
+      label: e.label,
+      amount: e.amount,
+      percent: (e.amount / totalExpenses) * 100,
+    }));
+  }, [allTransactionsForDisplay, totalExpenses, t]);
+
   const chartData = useMemo(() => {
     const byDay: Record<string, number> = {};
     let running = 0;
@@ -60,12 +110,12 @@ function DashboardPage() {
         new Date(
           (a.date as string)?.includes?.('/')
             ? (a.date as string).split('/').reverse().join('-')
-            : ((a.date as string) ?? 0),
+            : (a.date as string) ?? 0,
         ).getTime() -
         new Date(
           (b.date as string)?.includes?.('/')
             ? (b.date as string).split('/').reverse().join('-')
-            : ((b.date as string) ?? 0),
+            : (b.date as string) ?? 0,
         ).getTime(),
     );
     for (const tx of sorted) {
@@ -140,6 +190,53 @@ function DashboardPage() {
 
   const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
+  const handleGenerateAiInsight = async () => {
+    try {
+      setAiError(null);
+      setAiLoading(true);
+
+      const lang = (t as any).i18n?.language || 'pt';
+      const locale = lang.startsWith('en')
+        ? 'en'
+        : lang.startsWith('es')
+        ? 'es'
+        : 'pt';
+
+      const monthLabel = new Date().toLocaleDateString(
+        locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'pt-BR',
+        { month: 'long', year: 'numeric' },
+      );
+
+      const response = await fetch('/api/ai/month-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          monthLabel,
+          currency: currencyCode,
+          totalIncome,
+          totalExpenses,
+          balance,
+          topCategories,
+          locale,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar análise do mês');
+      }
+
+      const data = await response.json();
+
+      const insight = data.insight as AiMonthInsight;
+
+      setAiInsight(insight);
+    } catch (error) {
+      console.error(error);
+      setAiError('Não foi possível gerar a análise do mês. Tente novamente.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
   return (
     <div className="p-6 space-y-8 pb-32">
       {/* Header */}
@@ -292,7 +389,50 @@ function DashboardPage() {
           </AreaChart>
         </ResponsiveContainer>
       </section>
-
+      {/* AI Monthly Insight */}
+      <section className="space-y-3">
+        <button
+          type="button"
+          onClick={handleGenerateAiInsight}
+          disabled={aiLoading || transactionsLoading}
+          className="w-full rounded-2xl border border-primary/40 bg-primary/10 text-primary px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors disabled:opacity-60"
+        >
+          {aiLoading ? 'Gerando análise do mês...' : 'Gerar análise do mês'}
+        </button>
+        {aiError && <p className="text-xs text-destructive">{aiError}</p>}
+        {aiInsight && (
+          <div className="p-4 rounded-2xl bg-card border border-white/10 space-y-3">
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Resumo do mês
+              </p>
+              <p className="text-sm text-foreground whitespace-pre-line">
+                {aiInsight.resumo}
+              </p>
+            </div>
+            {aiInsight.maiorGasto && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Maior gasto
+                </p>
+                <p className="text-sm text-foreground whitespace-pre-line">
+                  {aiInsight.maiorGasto}
+                </p>
+              </div>
+            )}
+            {aiInsight.dica && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Dica
+                </p>
+                <p className="text-sm text-foreground whitespace-pre-line">
+                  {aiInsight.dica}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
       {/* Recent Transactions */}
       <section>
         <div className="flex items-center justify-between mb-4">
