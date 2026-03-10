@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Finance (PWA)
 
-## Getting Started
+Aplicação de **controle financeiro pessoal** feita em **Next.js (App Router)**, com foco em **mobile/PWA**. Permite registrar transações, visualizar resumo por mês, gerenciar categorias e gerar um **resumo mensal automático com IA (Gemini)**.
 
-First, run the development server:
+## Funcionalidades
+
+- **Autenticação**: login via **Firebase Auth**.
+- **Transações**:
+  - criar/editar/excluir
+  - listagem e detalhes
+  - suporte a categoria e forma de pagamento
+- **Período (mês/ano)**: navegação por mês via `PeriodContext` (ex.: dashboard, histórico).
+- **Regras de despesas fixas**: criação/remoção de regras (ex.: recorrências).
+- **Resumo do mês com IA**:
+  - botão para **gerar análise** do mês selecionado
+  - cache por mês no `localStorage`
+  - UI em formato de acordeão (sanfona)
+- **i18n**: UI traduzida em **pt / en / es**.
+- **PWA**: `next-pwa` com service worker e assets em `public/`.
+
+## Stack
+
+- **Next.js** (App Router)
+- **React**
+- **Tailwind CSS**
+- **Firebase** (Auth + dados)
+- **Gemini** (resumo mensal via API)
+- **Radix/shadcn** (componentes base: dialog, accordion, etc.)
+
+## Requisitos
+
+- Node.js (LTS recomendado)
+- npm (ou pnpm/yarn)
+
+## Configuração
+
+Crie um arquivo `.env.local` na raiz (não versionar) com:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Firebase (client)
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+
+# Gemini (server)
+GEMINI_API_KEY=...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Como rodar
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Abra `http://localhost:3000`.
 
-## Learn More
+## Build e deploy (export estático)
 
-To learn more about Next.js, take a look at the following resources:
+Este projeto está configurado com `output: 'export'` no `next.config.ts`, ou seja, gera um build **estático**:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Isso cria a pasta `out/` (site estático). Você pode servir localmente com qualquer servidor estático (ex.: `npx serve out`).
 
-## Deploy on Vercel
+### Observação importante sobre a IA no modo export
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A rota `src/app/api/ai/month-summary/route.ts` roda em **runtime Node.js** (precisa de servidor). Em deploy 100% estático (`output: 'export'`), rotas de API do Next **não ficam disponíveis**.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Opções:
+
+- **Manter export estático** e mover a IA para um backend separado (Cloud Functions, etc.), chamando via HTTP.
+- **Desativar `output: 'export'`** e fazer deploy em um ambiente com suporte a rotas server (serverless/Node).
+
+## Scripts úteis
+
+- `npm run dev`: desenvolvimento
+- `npm run build`: build (com export estático)
+- `npm run lint`: lint
