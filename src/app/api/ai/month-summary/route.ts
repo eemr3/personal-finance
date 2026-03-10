@@ -40,7 +40,12 @@ export async function POST(request: Request) {
         totalExpenses: round2(totalExpenses),
         balance: round2(balance),
         topCategories: topCategories.map(
-          (c: { key?: string; label?: string; amount?: number; percent?: number }) => ({
+          (c: {
+            key?: string;
+            label?: string;
+            amount?: number;
+            percent?: number;
+          }) => ({
             key: c.key ?? '',
             label: c.label ?? '',
             amount: round2(Number(c.amount ?? 0)),
@@ -51,7 +56,14 @@ export async function POST(request: Request) {
       locale,
     );
 
-    return NextResponse.json({ insight });
+    return new Response(JSON.stringify({ insight }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
   } catch (error) {
     console.error('Error generating month summary insight:', error);
     return NextResponse.json(
@@ -61,4 +73,14 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+export async function OPTIONS() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }

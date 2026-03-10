@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 function getGenAI() {
@@ -112,11 +111,4 @@ Remember: respond ONLY with a JSON object like:
       dica: '',
     };
   }
-}
-
-export function getApiUrl() {
-  if (Capacitor.isNativePlatform()) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  return window.location.origin;
 }

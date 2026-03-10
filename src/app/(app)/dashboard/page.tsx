@@ -14,9 +14,9 @@ import { usePeriod } from '@/contexts/PeriodContext';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
+import { getApiUrl } from '@/lib/api/getApiUrl';
 import { getCategoryLabel } from '@/lib/categories';
-
-import { getApiUrl, type AiMonthInsight } from '@/lib/ai/gemini';
+import { AiMonthInsight } from '../../../lib/ai/gemini';
 
 const AI_INSIGHT_STORAGE_KEY = 'pf_ai_insight';
 
@@ -73,7 +73,6 @@ function DashboardPage() {
     removeTransaction,
   } = useTransactionsWithRules();
 
-  console.log('user', user);
   const cacheKey = `${AI_INSIGHT_STORAGE_KEY}_${period.year}_${period.month}`;
 
   useEffect(() => {
@@ -279,8 +278,23 @@ function DashboardPage() {
         locale,
       };
 
+      if (!forceRefresh) {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (parsed?.resumo) {
+              setAiInsight(parsed);
+              setAiLoading(false);
+              return;
+            }
+          } catch {}
+        }
+      }
+
       const response = await fetch(`${getApiUrl()}/api/ai/month-summary`, {
         method: 'POST',
+
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
