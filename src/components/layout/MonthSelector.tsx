@@ -2,13 +2,13 @@
 
 import { Calendar, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { usePeriod } from '@/contexts/PeriodContext';
+import { usePeriod } from '@/providers/PeriodProvider';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 const MONTH_LIST = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { AppearanceProvider } from '@/contexts/AppearanceContext';
-import { I18nProvider } from '@/components/I18nProvider';
-import { PeriodProvider } from '@/contexts/PeriodContext';
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { AppearanceProvider } from '@/providers/AppearanceProvider';
+import { I18nProvider } from '@/providers/I18nProvider';
+import { PeriodProvider } from '@/providers/PeriodProvider';
 import { AuthProvider } from '../features/auth/hooks/useAuth';
 
 const inter = Inter({

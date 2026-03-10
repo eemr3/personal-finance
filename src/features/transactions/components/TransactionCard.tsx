@@ -13,7 +13,7 @@ import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useFormatDate } from '@/hooks/useFormatDate';
 import { useTranslation } from 'react-i18next';
 import { getCategoryLabel } from '@/lib/categories';
-import { CategoryIcon } from './CategoryIcon';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 
 interface TransactionCardProps {
   id: string;

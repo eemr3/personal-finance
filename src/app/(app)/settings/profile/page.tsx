@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, User } from 'lucide-react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
-import { formatDate } from '../../../../lib/format';
+import { formatDate } from '@/lib/format';
 import Image from 'next/image';
 import { ProfileField } from '../../../../components/ui/profile-field';
 

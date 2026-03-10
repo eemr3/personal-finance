@@ -5,7 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from './accordion';
 import { formatCurrency, type FormatCurrencyCode } from '@/lib/format';
 import { Lightbulb, TrendingDown } from 'lucide-react';
 

@@ -6,7 +6,7 @@ import {
   getCurrencySymbol,
   type FormatCurrencyCode,
 } from '@/lib/format';
-import { useAppearance } from '@/contexts/AppearanceContext';
+import { useAppearance } from '@/providers/AppearanceProvider';
 
 /**
  * Hook que retorna formatação de moeda e símbolo conforme a preferência do usuário (Aparência).

@@ -10,6 +10,7 @@
     "return": "Voltar",
     "actions": "Ações",
     "close": "Fechar",
+    "clear": "Limpar",
     "confirmDelete": "Confirmar exclusão"
   },
   "login": {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/Button';
+import { Button } from './AppButton';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from './dialog';
 export interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

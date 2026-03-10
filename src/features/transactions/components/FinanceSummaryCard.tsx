@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from './Card';
+import { Card, CardContent } from '@/components/ui/AppCard';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 
 interface FinanceSummaryCardProps {

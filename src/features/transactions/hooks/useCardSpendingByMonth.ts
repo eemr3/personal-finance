@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useTransactionsWithRules } from './useTransactionsWithRules';
-import { usePeriod } from '@/contexts/PeriodContext';
+import { usePeriod } from '@/providers/PeriodProvider';
 import {
   CARD_PAYMENT_METHODS,
   isCardPayment,

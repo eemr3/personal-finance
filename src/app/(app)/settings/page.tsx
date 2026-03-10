@@ -30,16 +30,16 @@ import { Button } from '@/components/ui/button';
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
-import { useAppearance } from '@/contexts/AppearanceContext';
+import { useAppearance } from '@/providers/AppearanceProvider';
 import { useTheme } from 'next-themes';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { getCategoryLabel } from '@/lib/categories';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { RuleFormModal, type RuleForEdit } from '@/components/RuleFormModal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { RuleFormModal, type RuleForEdit } from '@/features/rules/components/RuleFormModal';
 import type {
   AppearanceCurrency,
   AppearanceLanguage,
-} from '@/contexts/AppearanceContext';
+} from '@/providers/AppearanceProvider';
 import Image from 'next/image';
 
 const CURRENCY_OPTIONS: { value: AppearanceCurrency; label: string }[] = [

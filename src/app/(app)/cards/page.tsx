@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { ArrowDownRight, CreditCard } from 'lucide-react';
 
-import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { MonthSelector } from '@/components/MonthSelector';
-import { TransactionCard } from '@/components/TransactionCard';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { MonthSelector } from '@/components/layout';
+import { TransactionCard } from '@/features/transactions/components/TransactionCard';
 import { useCardSpendingByMonth } from '@/features/transactions/hooks/useCardSpendingByMonth';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useFormatDate } from '@/hooks/useFormatDate';

@@ -5,7 +5,7 @@ import {
   isBiometricEnabled,
   loginWithBiometric,
   disableBiometric,
-} from '@/services/auth/biometricAuth';
+} from '@/features/auth/services/biometricAuth';
 import { auth } from '@/lib/firebase/firebase-client';
 import { signInWithCustomToken } from 'firebase/auth';
 

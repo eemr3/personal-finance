@@ -3,7 +3,7 @@
 import { I18nextProvider } from 'react-i18next';
 import { useEffect } from 'react';
 import i18n from '@/i18n';
-import { useAppearance } from '@/contexts/AppearanceContext';
+import { useAppearance } from '@/providers/AppearanceProvider';
 
 /**
  * Sincroniza o idioma do i18n com a preferência do usuário (Aparência).

@@ -24,7 +24,6 @@ export function getPeriodRange(period: Period): { start: string; end: string } {
 
 /**
  * Verifica se uma transação está dentro do período.
- * Aceita date em YYYY-MM-DD, dd/mm/yyyy, ou usa createdAt (Timestamp) como fallback.
  */
 export function isTransactionInPeriod(
   t: { date?: string; createdAt?: { toDate?: () => Date } },

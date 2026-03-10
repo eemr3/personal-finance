@@ -1,6 +1,5 @@
 /**
  * Formas de pagamento: constantes e helpers.
- * Chaves usadas em transactions.paymentMethods.* para i18n.
  */
 
 import type { PaymentMethod } from '@/types/transactions';
@@ -13,7 +12,6 @@ export const PAYMENT_METHOD_KEYS: PaymentMethod[] = [
   'cash',
 ];
 
-/** Formas de pagamento que são cartões (para resumo mensal) */
 export const CARD_PAYMENT_METHODS: PaymentMethod[] = [
   'credit_personal',
   'credit_business',

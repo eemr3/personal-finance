@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { BottomNav } from '@/components/BottomNav';
+import { BottomNav } from './BottomNav';
 
 interface MobileLayoutProps {
   children: ReactNode;

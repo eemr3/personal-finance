@@ -1,15 +1,14 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { clsx } from 'clsx';
 
-import { ConfirmDialog } from '@/components/ConfirmDialog';
-
-import { MonthSelector } from '@/components/MonthSelector';
-import { TransactionCard } from '@/components/TransactionCard';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { MonthSelector } from '@/components/layout';
+import { TransactionCard } from '@/features/transactions/components/TransactionCard';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 
@@ -102,14 +101,27 @@ function TransactionsPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
         <input
           type="text"
           placeholder={t('transactions.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-secondary border border-white/5 rounded-2xl h-14 pl-12 pr-4 focus:outline-none focus:border-primary/50 transition-colors"
+          className={clsx(
+            'w-full bg-secondary border border-white/5 rounded-2xl h-14 pl-12 focus:outline-none focus:border-primary/50 transition-colors',
+            searchQuery ? 'pr-12' : 'pr-4'
+          )}
         />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+            aria-label={t('common.clear')}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Filters */}

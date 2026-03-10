@@ -6,8 +6,8 @@ import {
   isBiometricEnabled,
   loginWithBiometric,
   saveBiometricCredentials,
-} from '@/services/auth/biometricAuth';
-import { getLastGoogleTokens, signInWithGoogle } from '@/services/auth/googleAuth';
+} from '@/features/auth/services/biometricAuth';
+import { getLastGoogleTokens, signInWithGoogle } from '@/features/auth/services/googleAuth';
 import { Capacitor } from '@capacitor/core';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';

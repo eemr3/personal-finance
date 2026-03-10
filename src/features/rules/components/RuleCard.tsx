@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card } from './Card';
+import { Card } from '@/components/ui/AppCard';
 import { MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { getCategoryLabel } from '@/lib/categories';
 import { useTranslation } from 'react-i18next';
-import { CategoryIcon } from './CategoryIcon';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 
 interface RuleCardProps {
   id: string;

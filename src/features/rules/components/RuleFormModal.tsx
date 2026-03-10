@@ -1,8 +1,8 @@
 'use client';
 
 import React, { type FormEvent, useMemo, useState, useEffect } from 'react';
-import { Button } from '@/components/Button';
-import { Input, Select } from '@/components/Input';
+import { Button } from '@/components/ui/AppButton';
+import { Input, Select } from '@/components/ui/AppInput';
 import { X } from 'lucide-react';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { stripCurrencyFromAmount } from '@/lib/format';

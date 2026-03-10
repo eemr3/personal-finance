@@ -6,9 +6,9 @@ import {
   createTransaction,
   updateTransaction,
   deleteTransaction,
-} from '@/services/transactions/transactions.service';
+} from '@/features/transactions/services/transactions.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { usePeriod } from '@/contexts/PeriodContext';
+import { usePeriod } from '@/providers/PeriodProvider';
 
 export function useTransactions() {
   const { user } = useAuth();

@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/Button';
-import { Input, Select, TextArea } from '@/components/Input';
-import { usePeriod } from '@/contexts/PeriodContext';
+import { Button } from '@/components/ui/AppButton';
+import { Input, Select, TextArea } from '@/components/ui/AppInput';
+import { usePeriod } from '@/providers/PeriodProvider';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import {
   EXPENSE_CATEGORIES,

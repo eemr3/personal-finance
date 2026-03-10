@@ -117,9 +117,6 @@ export function formatCurrency(
 
 /**
  * Formata um valor numérico como moeda em Real brasileiro (BRL).
- * @param value - Valor a ser formatado
- * @param options - Opções adicionais de formatação (Intl.NumberFormat)
- * @returns String formatada, ex: "1.234,56"
  */
 export function formatBRL(
   value: number,
@@ -136,8 +133,6 @@ export type FormatDateFormat = 'mdy' | 'dmy' | 'ymd';
 
 /**
  * Formata data para exibição conforme o formato escolhido.
- * Aceita string ISO (YYYY-MM-DD), string dd/mm/yyyy, Date, ou Timestamp do Firestore.
- * @param dateFormat - mdy (MM/DD/YYYY), dmy (DD/MM/YYYY), ymd (YYYY-MM-DD). Omitido = dmy.
  */
 export function formatDate(
   value: string | Date | { toDate: () => Date } | null | undefined,

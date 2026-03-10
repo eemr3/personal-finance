@@ -1,7 +1,6 @@
 /**
  * Detecta preferências de idioma, moeda e formato de data a partir do navegador.
- * Funciona no PC (navegador) e em PWA no mobile.
- * Usado apenas na primeira vez no app (quando não há dados salvos no localStorage).
+ * Usado na primeira vez no app (quando não há dados salvos no localStorage).
  */
 
 export type DetectedLanguage = 'en' | 'pt' | 'es';
@@ -21,9 +20,6 @@ function getBrowserLocale(): string {
   return typeof lang === 'string' ? lang : 'en';
 }
 
-/**
- * Mapeia locale do navegador (ex: pt-BR, en-US) para idioma suportado pelo app.
- */
 export function detectLanguage(): DetectedLanguage {
   const locale = getBrowserLocale().toLowerCase();
   if (locale.startsWith('pt')) return 'pt';
@@ -31,10 +27,6 @@ export function detectLanguage(): DetectedLanguage {
   return 'en';
 }
 
-/**
- * Infere moeda a partir do locale/região do navegador.
- * pt-BR/pt -> BRL, en-US/en -> USD, es/DE/FR/IT/etc (Europa) -> EUR.
- */
 export function detectCurrency(): DetectedCurrency {
   const locale = getBrowserLocale().toLowerCase();
   if (locale.startsWith('pt')) return 'brl';
@@ -46,19 +38,12 @@ export function detectCurrency(): DetectedCurrency {
   return 'usd';
 }
 
-/**
- * Infere formato de data: en-US -> mdy, resto -> dmy.
- */
 export function detectDateFormat(): DetectedDateFormat {
   const locale = getBrowserLocale().toLowerCase();
   if (locale.startsWith('en-us') || locale === 'en') return 'mdy';
   return 'dmy';
 }
 
-/**
- * Retorna preferências detectadas (idioma, moeda, formato de data).
- * Só deve ser chamado no cliente (window/navigator disponível).
- */
 export function getDetectedPreferences(): DetectedPreferences {
   return {
     language: detectLanguage(),

@@ -9,7 +9,7 @@ import {
   type AppearanceCurrency,
   type AppearanceDateFormat,
   type AppearanceLanguage,
-} from '@/contexts/AppearanceContext';
+} from '@/providers/AppearanceProvider';
 import {
   ArrowLeft,
   Sun,

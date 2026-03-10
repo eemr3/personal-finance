@@ -1,9 +1,9 @@
 'use client';
 import React, { type FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/Button';
-import { RuleCard } from '@/components/RuleCard';
-import { Input, Select } from '@/components/Input';
+import { Button } from '@/components/ui/AppButton';
+import { RuleCard } from '@/features/rules/components/RuleCard';
+import { Input, Select } from '@/components/ui/AppInput';
 import { ArrowLeft, Plus, X } from 'lucide-react';
 import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';

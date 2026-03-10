@@ -8,7 +8,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
-import { getDetectedPreferences } from '@/lib/detect-locale';
+import { getDetectedPreferences } from '@/lib/locale';
 
 const STORAGE_KEY = 'personal-finance-appearance';
 

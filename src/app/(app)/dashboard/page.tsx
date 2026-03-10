@@ -6,17 +6,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
 
-import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { MonthlySummaryAccordion } from '@/components/MonthlySummaryAccordion';
-import { MonthSelector } from '@/components/MonthSelector';
-import { TransactionCard } from '@/components/TransactionCard';
-import { usePeriod } from '@/contexts/PeriodContext';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { MonthlySummaryAccordion } from '@/components/ui/MonthlySummaryAccordion';
+import { MonthSelector } from '@/components/layout';
+import { TransactionCard } from '@/features/transactions/components/TransactionCard';
+import { usePeriod } from '@/providers/PeriodProvider';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useTransactionsWithRules } from '@/features/transactions/hooks/useTransactionsWithRules';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { getApiUrl } from '@/lib/api/getApiUrl';
 import { getCategoryLabel } from '@/lib/categories';
-import { AiMonthInsight } from '../../../lib/ai/gemini';
+import type { AiMonthInsight } from '@/lib/ai/gemini';
 
 const AI_INSIGHT_STORAGE_KEY = 'pf_ai_insight';
 

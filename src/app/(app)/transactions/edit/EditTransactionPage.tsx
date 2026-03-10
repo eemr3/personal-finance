@@ -1,10 +1,10 @@
 'use client';
 
 import { type FormEvent, useState, useEffect, useMemo } from 'react';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/Button';
-import { Input, TextArea, Select } from '@/components/Input';
+import { Button } from '@/components/ui/AppButton';
+import { Input, TextArea, Select } from '@/components/ui/AppInput';
 import { useFormatCurrency } from '@/hooks/useFormatCurrency';
 import { useTransactions } from '@/features/transactions/hooks/useTransactions';
 import { getCategoryLabel } from '@/lib/categories';

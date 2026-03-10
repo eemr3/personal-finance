@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useFixedExpenseRules } from '@/features/rules/hooks/useFixedExpenseRules';
 import { calculateExpensesFromRules } from '@/lib/rules';
 import { useTransactions } from './useTransactions';
-import { usePeriod } from '@/contexts/PeriodContext';
+import { usePeriod } from '@/providers/PeriodProvider';
 
 export function useTransactionsWithRules() {
   const {

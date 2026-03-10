@@ -1,5 +1,5 @@
 import { AuthGuard } from '@/features/auth/components/AuthGuard';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { MobileLayout } from '@/components/layout';
 
 export default function AppLayout({
   children,

@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDate as formatDateLib, type FormatDateFormat } from '@/lib/format';
-import { useAppearance } from '@/contexts/AppearanceContext';
+import { useAppearance } from '@/providers/AppearanceProvider';
 
 type DateValue = string | Date | { toDate: () => Date } | null | undefined;
 
