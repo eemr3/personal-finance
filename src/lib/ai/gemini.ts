@@ -44,6 +44,7 @@ export async function generateMonthlyInsight(
   - "resumo": 2 a 4 frases curtas explicando o mês.
   - "maiorGasto": 1 frase destacando a principal categoria de gasto (use o label da categoria).
   - "dica": 1 ou 2 frases com sugestão prática e gentil (sem julgamento).
+  - Ao citar valores em dinheiro ou percentual, use SEMPRE exatamente 2 casas decimais (ex: 384,10 ou 55,5%).
   `;
 
   const systemPromptEn = `
@@ -53,6 +54,7 @@ export async function generateMonthlyInsight(
   - Use EXACTLY the numeric values from the JSON (do not make up numbers).
   - Always answer in natural English.
   - Response format: JSON object with "resumo", "maiorGasto", "dica".
+  - When writing currency or percentage values, use exactly 2 decimal places (e.g. 384.10 or 55.5%).
   `;
 
   const systemPromptEs = `
@@ -62,6 +64,7 @@ Reglas IMPORTANTES:
 - Usa EXACTAMENTE los valores numéricos del JSON (no inventes números).
 - Responde siempre en español.
 - Respuesta en formato JSON con "resumo", "maiorGasto", "dica".
+- Al citar valores en dinero o porcentaje, usa siempre exactamente 2 decimales (ej: 384,10 o 55,5%).
 `;
 
   const systemPrompt =

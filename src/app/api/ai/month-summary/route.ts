@@ -31,14 +31,22 @@ export async function POST(request: Request) {
       );
     }
 
+    const round2 = (n: number) => Math.round(n * 100) / 100;
     const insight = await generateMonthlyInsight(
       {
         monthLabel,
         currency,
-        totalIncome,
-        totalExpenses,
-        balance,
-        topCategories,
+        totalIncome: round2(totalIncome),
+        totalExpenses: round2(totalExpenses),
+        balance: round2(balance),
+        topCategories: topCategories.map(
+          (c: { key?: string; label?: string; amount?: number; percent?: number }) => ({
+            key: c.key ?? '',
+            label: c.label ?? '',
+            amount: round2(Number(c.amount ?? 0)),
+            percent: round2(Number(c.percent ?? 0)),
+          }),
+        ),
       },
       locale,
     );
