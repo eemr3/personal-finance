@@ -10,10 +10,13 @@
     "cap:assets": "npx @capacitor/assets generate --iconBackgroundColor=#0d1413 --iconBackgroundColorDark=#0d1413 --splashBackgroundColor=#0d1413 --splashBackgroundColorDark=#0d1413 --android"
   },
   "dependencies": {
-    "@capacitor-firebase/authentication": "^8.1.0",
+    "@aparajita/capacitor-biometric-auth": "^10.0.0",
     "@capacitor/android": "^8.2.0",
     "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
+    "@capacitor/preferences": "^8.0.1",
+    "@capgo/capacitor-native-biometric": "^8.4.2",
+    "@capgo/capacitor-social-login": "^8.3.8",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",

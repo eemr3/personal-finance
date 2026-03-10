@@ -1,46 +1,137 @@
 'use client';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import {
+  getBiometricTokens,
+  isBiometricAvailable,
+  isBiometricEnabled,
+  loginWithBiometric,
+  saveBiometricCredentials,
+} from '@/services/auth/biometricAuth';
+import { getLastGoogleTokens, signInWithGoogle } from '@/services/auth/googleAuth';
 import { Capacitor } from '@capacitor/core';
-import { motion } from 'motion/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../features/auth/hooks/useAuth';
-import { signInWithGoogle } from '../../../services/auth/googleAuth';
+import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-const DEFAULT_REDIRECT = '/dashboard';
+const DEFAULT_REDIRECT = '/dashboard.html';
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
   const { user } = useAuth();
-  const redirect = searchParams.get('redirect') ?? DEFAULT_REDIRECT;
-  const redirectTo = redirect.startsWith('/') ? redirect : DEFAULT_REDIRECT;
 
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
+  const [pendingUser, setPendingUser] = useState<{ uid: string; email: string } | null>(
+    null,
+  );
+  const [redirectBlocked, setRedirectBlocked] = useState(false);
+  // Substituir o useEffect de redirect por:
+  const redirectBlockedRef = useRef(false); // ✅ useRef em vez de useState para evitar re-render
+
+  // Na tela de login, no useEffect de debug
   useEffect(() => {
-    if (user) {
-      // No Capacitor: window.location força reload completo no WebView,
-      // evitando tela em branco após retorno do fluxo nativo do Google
+    async function checkBiometric() {
+      const available = await isBiometricAvailable();
+      const enabled = await isBiometricEnabled();
+      console.log('=== BIOMETRIC DEBUG ===');
+      console.log('available:', available);
+      console.log('enabled:', enabled);
+      console.log('isNative:', Capacitor.isNativePlatform());
+      setBiometricAvailable(available);
+      setBiometricEnabled(enabled);
+    }
+    checkBiometric();
+  }, []);
+
+  // Redirecionar se já logado
+  useEffect(() => {
+    if (user && !redirectBlockedRef.current) {
       if (Capacitor.isNativePlatform()) {
-        window.location.href = redirectTo;
+        window.location.href = DEFAULT_REDIRECT;
       } else {
-        router.replace(redirectTo);
+        router.replace('/dashboard');
       }
     }
-  }, [user, router, redirectTo]);
+  }, [user]);
 
   async function handleGoogleLogin() {
     try {
-      await signInWithGoogle();
-      // Redirect explícito após login: no Capacitor o auth state pode demorar
-      // a propagar; usar window.location garante navegação após o fluxo nativo
-      if (Capacitor.isNativePlatform()) {
-        window.location.href = redirectTo;
+      redirectBlockedRef.current = true;
+      const result = await signInWithGoogle(); // ✅ sempre UserCredential
+
+      if (biometricAvailable && !biometricEnabled && result?.user) {
+        setPendingUser({
+          uid: result.user.uid,
+          email: result.user.email ?? '',
+        });
+        setShowBiometricModal(true);
+        return;
       }
-    } catch (error) {
-      console.error(error);
+
+      redirectBlockedRef.current = false;
+      window.location.href = DEFAULT_REDIRECT;
+    } catch (error: any) {
+      redirectBlockedRef.current = false;
+      if (
+        error?.code === 'auth/cancelled-popup-request' ||
+        error?.code === 'auth/popup-closed-by-user'
+      )
+        return;
+      console.error('Erro no login:', error);
     }
+  }
+
+  async function handleBiometricLogin() {
+    try {
+      const credentials = await loginWithBiometric();
+      console.log('Biometric ok:', credentials.email);
+
+      // ✅ Recuperar tokens e reautenticar no Firebase
+      const tokens = await getBiometricTokens();
+
+      if (tokens?.idToken) {
+        const { GoogleAuthProvider, signInWithCredential } = await import(
+          'firebase/auth'
+        );
+        const { auth } = await import('@/lib/firebase/firebase-client');
+
+        const credential = GoogleAuthProvider.credential(
+          tokens.idToken,
+          tokens.accessToken,
+        );
+        await signInWithCredential(auth, credential);
+        console.log('Firebase reauth ok!');
+      }
+
+      window.location.href = DEFAULT_REDIRECT;
+    } catch (error) {
+      console.error('Biometric login failed:', error);
+    }
+  }
+
+  async function handleModalClose(activate: boolean) {
+    if (activate && pendingUser) {
+      // ✅ Pegar tokens que foram salvos durante o login Google
+      const { idToken, accessToken } = getLastGoogleTokens();
+
+      await saveBiometricCredentials(
+        pendingUser.uid,
+        pendingUser.email,
+        idToken ?? '',
+        accessToken ?? '',
+      );
+      console.log('Biometric saved for:', pendingUser.email);
+    }
+
+    setShowBiometricModal(false);
+    setPendingUser(null);
+    redirectBlockedRef.current = false;
+    window.location.href = DEFAULT_REDIRECT;
   }
 
   return (
@@ -51,21 +142,17 @@ function LoginPageContent() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        {/* Card principal */}
-        <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 md:p-12 border border-border transition-shadow duration-200">
-          {/* Logo/Ícone */}
+        <div className="bg-card text-card-foreground rounded-2xl shadow-xl p-8 md:p-12 border border-border">
+          {/* Logo */}
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex justify-center mb-8"
           >
-            <div className="w-[150px] h-[150px] flex items-center justify-center shadow-lg">
-              <Image src="/icons/icon-512.png" alt="Logo" width={100} height={100} />
-            </div>
+            <Image src="/icons/icon-512.png" alt="Logo" width={100} height={100} />
           </motion.div>
 
-          {/* Título e Subtítulo */}
           <div className="text-center mb-10">
             <h1 className="text-3xl font-bold text-foreground mb-3">
               {t('login.title')}
@@ -78,9 +165,8 @@ function LoginPageContent() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
-            className="w-full bg-card border-2 border-border rounded-xl py-4 px-6 flex items-center justify-center gap-3 hover:bg-transparent hover:border-accent-foreground/20 transition-all duration-200 group"
+            className="w-full bg-card border-2 border-border rounded-xl py-4 px-6 flex items-center justify-center gap-3 hover:bg-transparent hover:border-accent-foreground/20 transition-all duration-200"
           >
-            {/* Ícone do Google */}
             <svg className="w-6 h-6" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -99,57 +185,99 @@ function LoginPageContent() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-
             <span className="text-foreground font-medium">
               {t('login.continueWithGoogle')}
             </span>
           </motion.button>
 
-          {/* Texto de segurança */}
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            {t('login.secureLogin')}
-          </p>
-
-          {/* Indicador de segurança */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          {/* ✅ Botão de digital — só aparece se disponível e ativada */}
+          {biometricAvailable && biometricEnabled && (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleBiometricLogin}
+              className="w-full mt-3 bg-primary text-primary-foreground rounded-xl py-4 px-6 flex items-center justify-center gap-3"
+            >
               <svg
-                className="w-4 h-4 text-primary"
-                fill="none"
+                className="w-6 h-6"
                 viewBox="0 0 24 24"
+                fill="none"
                 stroke="currentColor"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
                 />
               </svg>
-              <span>{t('login.secureConnection')}</span>
-            </div>
-          </div>
+              <span className="font-medium">Entrar com digital</span>
+            </motion.button>
+          )}
         </div>
-
-        {/* Informações adicionais */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-6 text-center text-sm text-muted-foreground"
-        >
-          <p>
-            {t('login.termsPrefix')}{' '}
-            <a href="#" className="text-primary hover:opacity-90 underline">
-              {t('login.termsOfUse')}
-            </a>{' '}
-            {t('login.and')}{' '}
-            <a href="#" className="text-primary hover:opacity-90 underline">
-              {t('login.privacyPolicy')}
-            </a>
-          </p>
-        </motion.div>
       </motion.div>
+
+      {/* ✅ Modal de ativação de biometria */}
+      <AnimatePresence>
+        {showBiometricModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              className="bg-card rounded-2xl p-6 w-full max-w-md border border-border"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-primary"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <h2 className="text-xl font-bold text-center text-foreground mb-2">
+                Ativar login por digital?
+              </h2>
+              <p className="text-muted-foreground text-center text-sm mb-6">
+                Nas próximas vezes, entre rapidamente usando sua digital ou reconhecimento
+                facial.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => handleModalClose(true)}
+                  className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium"
+                >
+                  Ativar agora
+                </button>
+                <button
+                  onClick={() => handleModalClose(false)}
+                  className="w-full text-muted-foreground py-3 font-medium"
+                >
+                  Agora não
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

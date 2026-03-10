@@ -1,37 +1,71 @@
 import { Capacitor } from '@capacitor/core';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import {
   GoogleAuthProvider,
   signInWithCredential,
   signInWithPopup,
   signOut,
+  UserCredential,
 } from 'firebase/auth';
-import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { auth } from '@/lib/firebase/firebase-client';
 
-export async function signInWithGoogle() {
-  if (typeof window === 'undefined') return;
+let initialized = false;
+let lastIdToken: string | null = null; // ✅ guardar para biometria
+let lastAccessToken: string | null = null; // ✅ guardar para biometria
 
-  // No Capacitor (Android/iOS): usar auth nativa
-  // useCredentialManager: false evita Chrome Custom Tab que fica preso no Firebase auth handler
-  if (Capacitor.isNativePlatform()) {
-    const result = await FirebaseAuthentication.signInWithGoogle({
-      useCredentialManager: false,
+async function ensureInitialized() {
+  if (!initialized && Capacitor.isNativePlatform()) {
+    await SocialLogin.initialize({
+      google: {
+        webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!,
+      },
     });
-    const idToken = result.credential?.idToken;
-    if (!idToken) throw new Error('Falha ao obter token do Google');
-    const credential = GoogleAuthProvider.credential(idToken);
-    await signInWithCredential(auth, credential);
-    return;
+    initialized = true;
+  }
+}
+
+// ✅ Exportar para uso na tela de login ao salvar biometria
+export function getLastGoogleTokens() {
+  return { idToken: lastIdToken, accessToken: lastAccessToken };
+}
+
+export async function signInWithGoogle(): Promise<UserCredential> {
+  if (Capacitor.isNativePlatform()) {
+    await ensureInitialized();
+
+    const response = await SocialLogin.login({
+      provider: 'google',
+      options: {},
+    });
+
+    const googleResult = response.result;
+    if (!googleResult) throw new Error('Google Sign-In falhou: resultado ausente');
+    if (googleResult.responseType !== 'online')
+      throw new Error('responseType não é online');
+
+    const idToken = googleResult.idToken;
+    const accessToken = googleResult.accessToken?.token ?? null;
+    if (!idToken) throw new Error('Google Sign-In falhou: idToken ausente');
+
+    // ✅ Guardar tokens para uso posterior na biometria
+    lastIdToken = idToken;
+    lastAccessToken = accessToken;
+
+    const credential = GoogleAuthProvider.credential(idToken, accessToken);
+    return signInWithCredential(auth, credential);
   }
 
-  // Web: usar popup normalmente
   const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
+  return signInWithPopup(auth, provider);
 }
 
 export async function logout() {
   if (Capacitor.isNativePlatform()) {
-    await FirebaseAuthentication.signOut();
+    try {
+      await SocialLogin.logout({ provider: 'google' });
+    } catch (_) {}
   }
+  lastIdToken = null;
+  lastAccessToken = null;
   await signOut(auth);
 }

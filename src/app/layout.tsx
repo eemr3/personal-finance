@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AppearanceProvider } from '@/contexts/AppearanceContext';
 import { I18nProvider } from '@/components/I18nProvider';
 import { PeriodProvider } from '@/contexts/PeriodContext';
+import { AuthProvider } from '../features/auth/hooks/useAuth';
 
 const inter = Inter({
   variable: '--font-sans',
@@ -37,13 +38,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} antialiased font-sans`}
-      >
+      <body className={`${inter.variable} antialiased font-sans`}>
         <ThemeProvider>
           <AppearanceProvider>
             <I18nProvider>
-              <PeriodProvider>{children}</PeriodProvider>
+              <PeriodProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </PeriodProvider>
             </I18nProvider>
           </AppearanceProvider>
         </ThemeProvider>

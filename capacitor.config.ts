@@ -1,23 +1,21 @@
-/// <reference types="@capacitor-firebase/authentication" />
-
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.finwise.app',
   appName: 'FinWise',
-  webDir: 'www',
-  // Remova a propriedade 'server' para produção ou comente-a
-  /* server: {
-    url: 'https://finwise-io.vercel.app',
-    cleartext: false,
-  }, */
+  webDir: 'out', // ✅ era 'www', Next.js exporta para 'out'
   android: {
     allowMixedContent: true,
     captureInput: true,
   },
   plugins: {
-    FirebaseAuthentication: {
-      providers: ['google.com'],
+    SocialLogin: {
+      google: {
+        webClientId:
+          '580862513441-82oh923pftmlan6916pa3frskhlkam7m.apps.googleusercontent.com',
+      },
     },
   },
 };
+
+export default config;

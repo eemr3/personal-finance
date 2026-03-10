@@ -2,10 +2,10 @@
 
 ## O que foi corrigido
 
-### 1. Login com Google (tela em branco)
-- **Problema**: `signInWithPopup` não funciona bem no WebView do Capacitor no Android
-- **Solução**: Uso do plugin `@capacitor-firebase/authentication` com autenticação nativa
-- O login agora usa o fluxo nativo do Google no Android e mantém a sessão sincronizada com o Firebase JS SDK
+### 1. Login com Google (tela em branco / Firebase auth handler)
+- **Problema**: Fluxo web (Chrome Custom Tab) ficava preso em `firebaseapp.com/__/auth/handler`
+- **Solução**: Plugin `@codetrix-studio/capacitor-google-auth` com fluxo **100% nativo**
+- Não abre browser nem passa pelo Firebase auth handler
 
 ### 2. Splash e Ícone
 - **Problema**: App usava splash e ícone padrão do Capacitor
@@ -40,16 +40,20 @@ Copie o **SHA-1** (Debug e Release) e adicione em:
 ### 4. Habilitar Google Sign-In
 - Firebase Console → Authentication → Sign-in method → Google → Ativar
 
-### 5. Tela de consentimento OAuth (se aparecer tela em branco)
+### 5. Web Client ID (obrigatório)
+Adicione ao `.env.local`:
+```
+NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=seu-web-client-id.apps.googleusercontent.com
+```
+Encontre em: Firebase Console → Configurações do projeto → Seus apps → Web → Web client ID
+
+Ou edite `android/app/src/main/res/values/strings.xml` e substitua `server_client_id` pelo seu Web Client ID.
+
+### 6. Tela de consentimento OAuth (se aparecer tela em branco)
 Se após escolher a conta Google aparecer tela em branco ou "Um momento...":
 - [Google Cloud Console](https://console.cloud.google.com/) → APIs e Serviços → Tela de consentimento OAuth
 - Altere de "Interno" para **"Externo"** (publique, mesmo sem verificação)
 - Alguns dispositivos exigem que a tela esteja publicada
-
-### 6. Preso na página do Firebase auth handler
-Se ficar preso em `https://...firebaseapp.com/__/auth/handler`:
-- O app usa `useCredentialManager: false` para evitar o Chrome Custom Tab
-- O fluxo usa o Google Sign-In nativo (Intent) que permanece dentro do app
 
 ---
 
