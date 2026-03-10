@@ -25,13 +25,21 @@ export function getPeriodRange(period: Period): { start: string; end: string } {
 /**
  * Verifica se uma transação está dentro do período.
  */
+function parseDateLocal(dateStr: string): Date {
+  const ymd = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (ymd) {
+    return new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+  }
+  return new Date(dateStr);
+}
+
 export function isTransactionInPeriod(
   t: { date?: string; createdAt?: { toDate?: () => Date } },
   period: Period,
 ): boolean {
   const { start, end } = getPeriodRange(period);
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const startDate = parseDateLocal(start);
+  const endDate = parseDateLocal(end);
   endDate.setHours(23, 59, 59, 999);
 
   let date: Date | null = null;
@@ -45,7 +53,7 @@ export function isTransactionInPeriod(
         Number(ddmmyyyy[1]),
       );
     } else {
-      date = new Date(t.date);
+      date = parseDateLocal(t.date);
     }
   }
 

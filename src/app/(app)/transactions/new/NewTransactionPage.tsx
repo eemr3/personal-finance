@@ -41,8 +41,8 @@ export function NewTransactionPage() {
   });
 
   useEffect(() => {
-    const { start } = getPeriodRange(period);
-    setFormData((prev) => (prev.date ? prev : { ...prev, date: start }));
+    const today = new Date().toISOString().split('T')[0];
+    setFormData((prev) => (prev.date ? prev : { ...prev, date: today }));
   }, [period.month, period.year]);
 
   const categories: CategoryOption[] =
@@ -52,14 +52,14 @@ export function NewTransactionPage() {
           label: t(`transactions.categoriesIncome.${key}`),
         }))
       : transactionType === 'expense'
-        ? EXPENSE_CATEGORIES.map((key) => ({
-            value: key,
-            label: t(`transactions.categoriesExpense.${key}`),
-          }))
-        : FIXED_EXPENSE_CATEGORIES.map((key) => ({
-            value: key,
-            label: t(`transactions.categoriesFixedExpense.${key}`),
-          }));
+      ? EXPENSE_CATEGORIES.map((key) => ({
+          value: key,
+          label: t(`transactions.categoriesExpense.${key}`),
+        }))
+      : FIXED_EXPENSE_CATEGORIES.map((key) => ({
+          value: key,
+          label: t(`transactions.categoriesFixedExpense.${key}`),
+        }));
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -183,7 +183,10 @@ export function NewTransactionPage() {
             <Select
               label={t('transactions.paymentMethod')}
               options={[
-                { value: '', label: t('transactions.paymentMethodPlaceholder') },
+                {
+                  value: '',
+                  label: t('transactions.paymentMethodPlaceholder'),
+                },
                 ...PAYMENT_METHOD_KEYS.map((key) => ({
                   value: key,
                   label: t(`transactions.paymentMethods.${key}`),

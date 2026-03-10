@@ -149,7 +149,12 @@ export function formatDate(
         Number(ddmmyyyy[1]),
       );
     } else {
-      date = new Date(value);
+      const ymd = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (ymd) {
+        date = new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+      } else {
+        date = new Date(value);
+      }
     }
   } else if (value instanceof Date) {
     date = value;
