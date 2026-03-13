@@ -25,3 +25,4 @@ export const auth =
     ? initializeAuth(app, { persistence: indexedDBLocalPersistence })
     : getAuth(app);
 export const db = getFirestore(app);
+export const verifyToken = getAuth(app);

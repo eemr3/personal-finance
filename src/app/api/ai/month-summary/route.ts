@@ -1,11 +1,34 @@
 import { NextResponse } from 'next/server';
 import { generateMonthlyInsight } from '@/lib/ai/gemini';
+import { adminAuth } from '@/lib/firebase/firebase-admin';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const authHeader = request.headers.get('authorization');
+
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    let decodedToken;
+
+    try {
+      decodedToken = await adminAuth.verifyIdToken(token);
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    if (decodedToken.uid !== process.env.OWNER_UID) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const {
       monthLabel,

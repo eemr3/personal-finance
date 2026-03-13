@@ -47,6 +47,7 @@
     "country-flag-icons": "^1.6.15",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.10.0",
+    "firebase-admin": "^13.7.0",
     "i18next": "^25.8.14",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.577.0",

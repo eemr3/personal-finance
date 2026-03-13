@@ -20,39 +20,8 @@ import type { AiMonthInsight } from '@/lib/ai/gemini';
 
 const AI_INSIGHT_STORAGE_KEY = 'pf_ai_insight';
 
-// const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// export function getApiUrl() {
-//   if (typeof window === 'undefined') return '';
-
-//   if (window.location.origin.includes('capacitor')) {
-//     return API_URL;
-//   }
-
-//   return window.location.origin;
-// }
-
-// function getMonthKey(t: {
-//   date?: string;
-//   createdAt?: { toDate?: () => Date };
-// }): string {
-//   if (typeof t.date === 'string') {
-//     const ddmmyyyy = t.date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-//     if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}`;
-//     const iso = t.date.match(/^(\d{4})-(\d{2})/);
-//     if (iso) return `${iso[1]}-${iso[2]}`;
-//   }
-//   const ts = t.createdAt as { toDate?: () => Date } | undefined;
-//   if (ts?.toDate) {
-//     const d = ts.toDate();
-//     const y = d.getFullYear();
-//     const m = String(d.getMonth() + 1).padStart(2, '0');
-//     return `${y}-${m}`;
-//   }
-//   return '';
-// }
-
 function DashboardPage() {
+  const OWNER_EMAIL = process.env.NEXT_PUBLIC_OWNER_EMAIL;
   const router = useRouter();
   const { t } = useTranslation();
   const { period, goToCurrentMonth, isCurrentMonth } = usePeriod();
@@ -240,6 +209,7 @@ function DashboardPage() {
   const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
   const handleGenerateAiInsight = async (forceRefresh = false) => {
+    const token = await user.getIdToken();
     if (aiLoading) return;
     setAiError(null);
     setAiLoading(true);
@@ -295,7 +265,10 @@ function DashboardPage() {
       const response = await fetch(`${getApiUrl()}/api/ai/month-summary`, {
         method: 'POST',
 
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
 
@@ -513,48 +486,50 @@ function DashboardPage() {
         </ResponsiveContainer>
       </section>
       {/* AI Monthly Insight */}
-      <section className="space-y-3" aria-live="polite">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => handleGenerateAiInsight(!!aiInsight)}
-            disabled={aiLoading || transactionsLoading}
-            className="flex-1 rounded-2xl border border-primary/40 bg-primary/10 text-primary px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors disabled:opacity-60"
-          >
-            {aiLoading
-              ? t('dashboard.aiGenerating')
-              : aiInsight
-              ? t('dashboard.aiGenerateAgain')
-              : t('dashboard.aiGenerate')}
-          </button>
-        </div>
-        {aiError && <p className="text-xs text-destructive">{aiError}</p>}
-        {aiLoading && (
-          <div className="p-4 rounded-2xl bg-card border border-white/10 space-y-3 animate-pulse">
-            <div className="h-4 w-2/3 rounded bg-white/10" />
-            <div className="h-4 w-full rounded bg-white/10" />
-            <div className="h-4 w-3/4 rounded bg-white/10" />
-            <div className="h-4 w-1/2 rounded bg-white/10" />
+      {user.email === OWNER_EMAIL && (
+        <section className="space-y-3" aria-live="polite">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleGenerateAiInsight(!!aiInsight)}
+              disabled={aiLoading || transactionsLoading}
+              className="flex-1 rounded-2xl border border-primary/40 bg-primary/10 text-primary px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/20 transition-colors disabled:opacity-60"
+            >
+              {aiLoading
+                ? t('dashboard.aiGenerating')
+                : aiInsight
+                ? t('dashboard.aiGenerateAgain')
+                : t('dashboard.aiGenerate')}
+            </button>
           </div>
-        )}
-        {!aiLoading && (
-          <MonthlySummaryAccordion
-            monthName={monthName}
-            currentYear={period.year}
-            monthlyIncome={totalIncome}
-            monthlyExpense={totalExpenses}
-            monthlyBalance={balance}
-            currency={currency}
-            resumo={aiInsight?.resumo}
-            maiorGasto={aiInsight?.maiorGasto}
-            dica={aiInsight?.dica}
-            labelMonthSummary={t('dashboard.aiMonthSummary')}
-            labelBiggestExpense={t('dashboard.aiBiggestExpense')}
-            labelTip={t('dashboard.aiTip')}
-            defaultOpen={!!aiInsight}
-          />
-        )}
-      </section>
+          {aiError && <p className="text-xs text-destructive">{aiError}</p>}
+          {aiLoading && (
+            <div className="p-4 rounded-2xl bg-card border border-white/10 space-y-3 animate-pulse">
+              <div className="h-4 w-2/3 rounded bg-white/10" />
+              <div className="h-4 w-full rounded bg-white/10" />
+              <div className="h-4 w-3/4 rounded bg-white/10" />
+              <div className="h-4 w-1/2 rounded bg-white/10" />
+            </div>
+          )}
+          {!aiLoading && (
+            <MonthlySummaryAccordion
+              monthName={monthName}
+              currentYear={period.year}
+              monthlyIncome={totalIncome}
+              monthlyExpense={totalExpenses}
+              monthlyBalance={balance}
+              currency={currency}
+              resumo={aiInsight?.resumo}
+              maiorGasto={aiInsight?.maiorGasto}
+              dica={aiInsight?.dica}
+              labelMonthSummary={t('dashboard.aiMonthSummary')}
+              labelBiggestExpense={t('dashboard.aiBiggestExpense')}
+              labelTip={t('dashboard.aiTip')}
+              defaultOpen={!!aiInsight}
+            />
+          )}
+        </section>
+      )}
       {/* Recent Transactions */}
       <section>
         <div className="flex items-center justify-between mb-4">
