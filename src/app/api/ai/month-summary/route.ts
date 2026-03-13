@@ -3,6 +3,11 @@ import { generateMonthlyInsight } from '@/lib/ai/gemini';
 import { adminAuth } from '@/lib/firebase/firebase-admin';
 
 export const runtime = 'nodejs';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
 
 export async function POST(request: Request) {
   try {
@@ -10,11 +15,17 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get('authorization');
 
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401, headers: corsHeaders },
+      );
     }
 
     if (!authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401, headers: corsHeaders },
+      );
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -23,11 +34,17 @@ export async function POST(request: Request) {
     try {
       decodedToken = await adminAuth.verifyIdToken(token);
     } catch (error) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Invalid token' },
+        { status: 401, headers: corsHeaders },
+      );
     }
 
     if (decodedToken.uid !== process.env.OWNER_UID) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403, headers: corsHeaders },
+      );
     }
 
     const {
@@ -50,7 +67,7 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         { error: 'Invalid request body' },
-        { status: 400 },
+        { status: 400, headers: corsHeaders },
       );
     }
 
@@ -80,12 +97,8 @@ export async function POST(request: Request) {
     );
 
     return new Response(JSON.stringify({ insight }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
+      status: 200,
+      headers: corsHeaders,
     });
   } catch (error) {
     console.error('Error generating month summary insight:', error);
@@ -93,17 +106,14 @@ export async function POST(request: Request) {
       {
         error: 'Falha ao gerar resumo com IA.',
       },
-      { status: 500 },
+      { status: 500, headers: corsHeaders },
     );
   }
 }
 
 export async function OPTIONS() {
   return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    status: 200,
+    headers: corsHeaders,
   });
 }
