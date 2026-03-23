@@ -144,15 +144,11 @@ IMPORTANTE: El JSON de retorno debe seguir EXACTAMENTE esta estructura de lista 
       : systemPromptPt;
 
   const input = `
-CONTEXT JSON (do not repeat literally, just use it as data):
-${JSON.stringify(summary, null, 2)}
-Remember: respond ONLY with a JSON object like:
-{
-  "resumo": "...",
-  "maiorGasto": "...",
-  "dica": "..."
-}
-`;
+      CONTEXT JSON:
+      ${JSON.stringify(summary, null, 2)}
+      
+      Remember: respond ONLY with the "insights" array structure requested in the system prompt.
+      `;
 
   const result = await model.generateContent([systemPrompt, input]);
   let text = result.response.text().trim();
@@ -164,17 +160,49 @@ Remember: respond ONLY with a JSON object like:
   }
 
   try {
-    const parsed = JSON.parse(text) as Record<string, unknown>;
+    const parsed = JSON.parse(text);
+
+    // Se a IA seguiu o prompt novo, ela enviou a chave "insights"
+    if (parsed.insights && Array.isArray(parsed.insights)) {
+      return {
+        insights: parsed.insights.map((item: any) => ({
+          icon: String(item.icon ?? 'bulb'),
+          color: String(item.color ?? 'primary'),
+          text: String(item.text ?? ''),
+        })),
+      };
+    }
+
+    // Fallback caso a IA use o formato antigo por "vício" do modelo
     return {
-      resumo: String(parsed.resumo ?? parsed.summary ?? ''),
-      maiorGasto: String(parsed.maiorGasto ?? parsed.topSpending ?? ''),
-      dica: String(parsed.dica ?? parsed.tip ?? ''),
+      insights: [
+        {
+          icon: 'trending-down',
+          color: 'income',
+          text: String(parsed.resumo ?? parsed.summary ?? ''),
+        },
+        {
+          icon: 'alert-circle',
+          color: 'warning',
+          text: String(parsed.maiorGasto ?? parsed.largestExpense ?? ''),
+        },
+        {
+          icon: 'bulb',
+          color: 'primary',
+          text: String(parsed.dica ?? parsed.tip ?? ''),
+        },
+      ],
     };
   } catch {
+    // Fallback de erro crítico
     return {
-      resumo: text,
-      maiorGasto: '',
-      dica: '',
+      insights: [
+        {
+          icon: 'alert-circle',
+          color: 'warning',
+          text: 'Não foi possível gerar insights agora.',
+        },
+      ],
     };
   }
 }
