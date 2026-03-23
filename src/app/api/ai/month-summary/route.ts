@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     }
 
     const round2 = (n: number) => Math.round(n * 100) / 100;
-    const insight = await generateMonthlyInsight(
+    const { insights } = await generateMonthlyInsight(
       {
         monthLabel,
         currency,
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
       locale,
     );
 
-    return new Response(JSON.stringify({ insight }), {
+    return new Response(JSON.stringify({ insights }), {
       status: 200,
       headers: corsHeaders,
     });
