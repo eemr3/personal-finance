@@ -31,17 +31,20 @@ function TransactionsPage() {
   } = useTransactionsWithRules();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
-    'all'
+    'all',
   );
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
-    null
+    null,
   );
 
+  console.log('allTransactionsForDisplay', allTransactionsForDisplay);
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     const txType = (t: { type?: unknown }) =>
-      String(t.type ?? '').toLowerCase().trim();
+      String(t.type ?? '')
+        .toLowerCase()
+        .trim();
     return allTransactionsForDisplay.filter((transaction) => {
       const matchesSearch =
         !query ||
@@ -109,7 +112,7 @@ function TransactionsPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className={clsx(
             'w-full bg-secondary border border-white/5 rounded-2xl h-14 pl-12 focus:outline-none focus:border-primary/50 transition-colors',
-            searchQuery ? 'pr-12' : 'pr-4'
+            searchQuery ? 'pr-12' : 'pr-4',
           )}
         />
         {searchQuery && (
@@ -137,7 +140,7 @@ function TransactionsPage() {
                 'flex-1 py-2 text-sm font-medium rounded-lg capitalize transition-all',
                 isActive
                   ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {t(labelKey)}
@@ -157,7 +160,9 @@ function TransactionsPage() {
                 id={transaction.id}
                 type={(transaction.type as 'income' | 'expense') ?? 'expense'}
                 name={transaction.name ?? ''}
-                amount={Number((transaction as { amount?: number }).amount ?? 0)}
+                amount={Number(
+                  (transaction as { amount?: number }).amount ?? 0,
+                )}
                 category={transaction.category}
                 paymentMethod={transaction.paymentMethod}
                 date={transaction.date as string}
